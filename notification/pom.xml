@@ -11,5 +11,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>notification-model</module>
+		<module>notification-repository</module>
+		<module>notification-service</module>
 	</modules>
 </project>

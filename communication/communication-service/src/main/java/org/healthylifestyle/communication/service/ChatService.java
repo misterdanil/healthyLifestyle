@@ -2,28 +2,43 @@ package org.healthylifestyle.communication.service;
 
 import java.util.List;
 
+import org.healthylifestyle.common.error.ValidationException;
 import org.healthylifestyle.communication.common.dto.AddingUserRequest;
+import org.healthylifestyle.communication.common.dto.AttachEventRequest;
 import org.healthylifestyle.communication.common.dto.ChatCreatingRequest;
 import org.healthylifestyle.communication.common.dto.ChatUpdatingRequest;
+import org.healthylifestyle.communication.common.dto.JoiningChatRequest;
+import org.healthylifestyle.communication.common.dto.LeavingChatRequest;
+import org.healthylifestyle.communication.common.dto.RemovingChatRequest;
 import org.healthylifestyle.communication.model.Chat;
+import org.healthylifestyle.communication.model.ChatUser;
+import org.healthylifestyle.user.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ChatService {
-	Chat save(ChatCreatingRequest savingRequest);
+	Chat save(ChatCreatingRequest savingRequest, MultipartFile image) throws ValidationException;
 
 	List<Chat> findByTitle(String title);
 
-	Chat update(ChatUpdatingRequest updatingRequest, MultipartFile multipartFile);
+	Chat update(ChatUpdatingRequest updatingRequest, MultipartFile image) throws ValidationException;
 
-	void joinChat(Long chatId);
+	void joinChat(JoiningChatRequest joiningRequest) throws ValidationException;
 
-	void addUser(AddingUserRequest addingRequest);
+	void addUser(AddingUserRequest addingRequest) throws ValidationException;
 
-	void joinByInvitation(Long chatId);
+	void joinByInvitation(JoiningChatRequest joiningRequest) throws ValidationException;
 
-	void leave(Long chatId);
+	void leave(LeavingChatRequest leavingRequest) throws ValidationException;
 
-	void remove(Long chatId);
+	void remove(RemovingChatRequest removingRequest) throws ValidationException;
 
-	void attachEvent(Long eventId);
+	void attachEvent(AttachEventRequest attachRequest) throws ValidationException;
+
+	List<ChatUser> findAllChatUsersByChatId(Long chatId) throws ValidationException;
+
+	boolean isMember(Chat chat, User user);
+	
+	boolean isAdmin(Chat chat, User user);
+
+	boolean isOwner(Chat chat, User user);
 }

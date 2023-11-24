@@ -1,12 +1,16 @@
 package org.healthylifestyle.communication.common.dto;
 
-import java.util.List;
-
-import org.healthylifestyle.user.model.Role;
-
 public class AddingUserRequest {
+	private Long chatId;
 	private Long userId;
-	private List<Role> roles;
+
+	public Long getChatId() {
+		return chatId;
+	}
+
+	public void setChatId(Long chatId) {
+		this.chatId = chatId;
+	}
 
 	public Long getUserId() {
 		return userId;
@@ -14,14 +18,6 @@ public class AddingUserRequest {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
-	}
-
-	public List<Role> getRoles() {
-		return roles;
-	}
-
-	public void setRoles(List<Role> roles) {
-		this.roles = roles;
 	}
 
 }

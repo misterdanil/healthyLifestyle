@@ -1,15 +1,19 @@
 package org.healthylifestyle.filesystem.service.impl;
 
+import java.util.List;
+
 import org.apache.commons.io.FilenameUtils;
 import org.healthylifestyle.common.dto.ErrorResult;
 import org.healthylifestyle.common.error.ValidationException;
 import org.healthylifestyle.common.web.ErrorParser;
+import org.healthylifestyle.communication.model.Message;
 import org.healthylifestyle.filesystem.model.File;
 import org.healthylifestyle.filesystem.model.Image;
 import org.healthylifestyle.filesystem.repository.ImageRepository;
 import org.healthylifestyle.filesystem.service.FileService;
 import org.healthylifestyle.filesystem.service.ImageService;
 import org.healthylifestyle.filesystem.service.dto.ImageSavingRequest;
+import org.healthylifestyle.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -60,6 +64,11 @@ public class ImageServiceImpl implements ImageService {
 		fileService.remove(image.getFile());
 
 		imageRepository.delete(image);
+	}
+
+	@Override
+	public void deleteByMessage(List<Long> ids, Message message, User user) {
+		imageRepository.deleteByMessage(ids, message, user);
 	}
 
 }

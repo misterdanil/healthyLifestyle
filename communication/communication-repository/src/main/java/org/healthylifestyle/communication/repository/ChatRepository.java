@@ -15,15 +15,23 @@ public interface ChatRepository extends CrudRepository<Chat, Long> {
 	@Query("select case when count(cu) > 0 then true else false end from ChatUser cu "
 			+ "where cu.chat = :chat and cu.user = :user")
 	boolean isMember(Chat chat, User user);
-	
+
+	@Query("select case when count(cu) > 0 then true else false end from ChatUser cu "
+			+ "where cu.chat_id = :chatId and cu.userId = :userId")
+	boolean isMember(Long chatId, Long userId);
+
 	@Query("select case when count(r) > 0 then true else false end from Role r "
 			+ "inner join chatuser_role cur on r.id = cur.role_id "
 			+ "inner join ChatUser cu on cu.id = cur.chatuser_id "
-			+ "where cu.chat = :chat and cu.user = :user and r.name = 'ROLE_CHAT_ADMIN'")boolean isAdmin(Chat chat, User user);
+			+ "where cu.chat = :chat and cu.user = :user and r.name = 'ROLE_CHAT_ADMIN'")
+	boolean isAdmin(Chat chat, User user);
 
 	@Query("select case when count(r) > 0 then true else false end from Role r "
 			+ "inner join chatuser_role cur on r.id = cur.role_id "
 			+ "inner join ChatUser cu on cu.id = cur.chatuser_id "
 			+ "where cu.chat = :chat and cu.user = :user and r.name = 'ROLE_CHAT_OWNER'")
 	boolean isOwner(Chat chat, User user);
+
+	@Query("select c from Chat c inner join Message m on m.chat.id = c.id where m.id = :messageId")
+	Chat findByMessage(Long messageId);
 }

@@ -1,10 +1,12 @@
 package org.healthylifestyle.communication.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.healthylifestyle.filesystem.model.Image;
 import org.healthylifestyle.filesystem.model.Video;
+import org.healthylifestyle.filesystem.model.Voice;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -32,14 +34,25 @@ public class Message {
 	@ManyToOne
 	@JoinColumn(name = "chatuser_id", nullable = false)
 	private ChatUser chatUser;
+	@ManyToOne
+	@JoinColumn(name = "chat_id", nullable = false)
+	private Chat chat;
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "message_id", nullable = false)
 	private List<Image> images;
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "message_id", nullable = false)
 	private List<Video> videos;
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "message_id", nullable = false)
+	private List<Voice> voices;
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<Reaction> reactions;
+	@ManyToOne
+	@JoinColumn(name = "message_id", nullable = false)
+	private Message answeredMessage;
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date createdOn;
+	private Date createdOn = new Date();
 
 	public Long getId() {
 		return id;
@@ -65,20 +78,76 @@ public class Message {
 		this.chatUser = chatUser;
 	}
 
+	public Chat getChat() {
+		return chat;
+	}
+
+	public void setChat(Chat chat) {
+		this.chat = chat;
+	}
+
 	public List<Image> getImages() {
 		return images;
 	}
 
-	public void setImages(List<Image> images) {
-		this.images = images;
+	public void addImages(List<Image> images) {
+		if (images == null) {
+			return;
+		}
+
+		if (this.images == null) {
+			this.images = new ArrayList<>();
+		}
+
+		this.images.addAll(images);
 	}
 
 	public List<Video> getVideos() {
 		return videos;
 	}
 
-	public void setVideos(List<Video> videos) {
-		this.videos = videos;
+	public void addVideos(List<Video> videos) {
+		if (videos == null) {
+			return;
+		}
+
+		if (this.videos == null) {
+			this.videos = new ArrayList<>();
+		}
+
+		this.videos.addAll(videos);
+
+	}
+
+	public List<Voice> getVoices() {
+		return voices;
+	}
+
+	public void addVoices(List<Voice> voices) {
+		if (voices == null) {
+			return;
+		}
+		if (this.voices == null) {
+			this.voices = new ArrayList<>();
+		}
+
+		this.voices.addAll(voices);
+	}
+
+	public List<Reaction> getReactions() {
+		return reactions;
+	}
+
+	public void setReactions(List<Reaction> reactions) {
+		this.reactions = reactions;
+	}
+
+	public Message getAnsweredMessage() {
+		return answeredMessage;
+	}
+
+	public void setAnsweredMessage(Message answeredMessage) {
+		this.answeredMessage = answeredMessage;
 	}
 
 	public Date getCreatedOn() {

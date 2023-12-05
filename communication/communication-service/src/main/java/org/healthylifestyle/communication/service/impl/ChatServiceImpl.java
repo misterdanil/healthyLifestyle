@@ -71,6 +71,26 @@ public class ChatServiceImpl implements ChatService {
 	private EventService eventService;
 
 	@Override
+	public Chat findById(Long id) throws ValidationException {
+		BindingResult validationResult = new MapBindingResult(new LinkedHashMap<>(), "chat");
+
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		User user = userService.findByUsername(auth.getName());
+		Chat chat = chatRepository.findById(id).get();
+
+		if (!isMember(chat, user)) {
+			reject("chat.find.notMember", validationResult, id);
+
+			throw new ValidationException(
+					"Exception occurred while checking for a chat membership. User with id '%s' isn't a member of the chat with id '%s'",
+					validationResult, user.getId(), chat.getId());
+		}
+
+		return chat;
+	}
+
+	@Override
 	public Chat save(ChatCreatingRequest savingRequest, MultipartFile image) throws ValidationException {
 		BindingResult validationResult = new BeanPropertyBindingResult(savingRequest, "chatCreatingRequest");
 		validator.validate(savingRequest, validationResult);
@@ -300,13 +320,12 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	private void rejectValue(String value, String code, BindingResult validationResult, Object... args) {
-		validationResult.rejectValue("chatId", code,
+		validationResult.rejectValue(value, code,
 				messageSource.getMessage(code, args, LocaleContextHolder.getLocale()));
 	}
 
 	private void reject(String code, BindingResult validationResult, Object... args) {
 		validationResult.reject(code, messageSource.getMessage(code, args, LocaleContextHolder.getLocale()));
-
 	}
 
 	@Override
@@ -499,37 +518,13 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public List<ChatUser> findAllChatUsersByChatId(Long chatId) throws ValidationException {
-		BindingResult validationResult = new MapBindingResult(new LinkedHashMap<>(), "chat");
-
-		Chat chat = chatRepository.findById(chatId).get();
-		if (chat == null) {
-			reject("chat.findUsers.chatId.notExist", validationResult, chatId);
-
-			throw new ValidationException(
-					"Exception occurred while finding chat to get users. There is no chat with this id '%s'",
-					validationResult, Type.BAD_REQUEST, chatId);
-		}
-
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
-
-		if (!isMember(chat, user)) {
-			reject("chat.findUsers.notMember", validationResult);
-
-			throw new ValidationException(
-					"Excption occurred while checking user for admin role to get users from chat '%s'. The user with id '%s' doesn't have it",
-					validationResult, Type.FORBIDDEN, chatId, user.getId());
-		}
-
-		List<ChatUser> chatUsers = chatUserService.findByChat(chat);
-
-		return chatUsers;
+	public boolean isMember(Chat chat, User user) {
+		return chatRepository.isMember(chat, user);
 	}
 
 	@Override
-	public boolean isMember(Chat chat, User user) {
-		return chatRepository.isMember(chat, user);
+	public boolean isMember(Long chatId, Long userId) {
+		return chatRepository.isMember(chatId, userId);
 	}
 
 	@Override
@@ -541,5 +536,12 @@ public class ChatServiceImpl implements ChatService {
 	public boolean isOwner(Chat chat, User user) {
 		return chatRepository.isOwner(chat, user);
 	}
+
+	@Override
+	public Chat findByMessage(Long messageId) {
+		return chatRepository.findByMessage(messageId);
+	}
+	
+	
 
 }

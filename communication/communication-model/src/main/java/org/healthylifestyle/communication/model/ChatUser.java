@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -29,7 +30,7 @@ public class ChatUser {
 	@OneToOne
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "chat_id", nullable = false)
 	private Chat chat;
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "chatUser")
@@ -37,6 +38,11 @@ public class ChatUser {
 	@ManyToMany
 	@JoinTable(name = "chatuser_role", joinColumns = @JoinColumn(name = "chatuser_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false))
 	private List<Role> roles;
+	@ManyToMany
+	@JoinTable(name = "favorite_messages", joinColumns = @JoinColumn(name = "chatuser_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "message_id", nullable = false))
+	private List<Message> favoriteMessages;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "chatUser")
+	private List<Reaction> reactions;
 
 	public Long getId() {
 		return id;
@@ -88,6 +94,52 @@ public class ChatUser {
 		}
 
 		roles.add(role);
+	}
+
+	public List<Message> getFavoriteMessages() {
+		return favoriteMessages;
+	}
+
+	public void addFavoriteMessages(List<Message> favoriteMessages) {
+		if (favoriteMessages == null || favoriteMessages.isEmpty()) {
+			return;
+		}
+
+		checkFavoriteMessages();
+
+		this.favoriteMessages.addAll(favoriteMessages);
+	}
+
+	public void addFavoriteMessage(Message message) {
+		if (message == null) {
+			return;
+		}
+
+		checkFavoriteMessages();
+
+		this.favoriteMessages.add(message);
+	}
+
+	private void checkFavoriteMessages() {
+		if (this.favoriteMessages == null) {
+			this.favoriteMessages = new ArrayList<>();
+		}
+	}
+
+	public List<Reaction> getReactions() {
+		return reactions;
+	}
+
+	public void addReaction(Reaction reaction) {
+		if (reaction == null) {
+			return;
+		}
+
+		if (reactions == null) {
+			reactions = new ArrayList<>();
+		}
+
+		reactions.add(reaction);
 	}
 
 }

@@ -2,6 +2,8 @@ package org.healthylifestyle.common.error;
 
 import org.healthylifestyle.common.dto.ErrorResult;
 import org.healthylifestyle.common.web.ErrorParser;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.BindingResult;
 
 public class ValidationException extends Exception {

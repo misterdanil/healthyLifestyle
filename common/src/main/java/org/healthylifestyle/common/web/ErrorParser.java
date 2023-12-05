@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.healthylifestyle.common.dto.ErrorResult;
+import org.healthylifestyle.common.error.Type;
+import org.healthylifestyle.common.error.ValidationException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.BindingResult;
 
 public class ErrorParser {
@@ -22,5 +26,23 @@ public class ErrorParser {
 
 		ErrorResult er = new ErrorResult(fieldErrors, globalErrors);
 		return er;
+	}
+
+	public static void rejectValue(String value, String code, BindingResult validationResult,
+			MessageSource messageSource, Object... args) {
+		validationResult.rejectValue(value, code,
+				messageSource.getMessage(code, args, LocaleContextHolder.getLocale()));
+	}
+
+	public static void reject(String code, BindingResult validationResult, MessageSource messageSource,
+			Object... args) {
+		validationResult.reject(code, messageSource.getMessage(code, args, LocaleContextHolder.getLocale()));
+	}
+
+	public static void checkErrors(BindingResult validationResult, String message, Type type, Object... args)
+			throws ValidationException {
+		if (validationResult.hasErrors()) {
+			throw new ValidationException(message, validationResult, type, args);
+		}
 	}
 }

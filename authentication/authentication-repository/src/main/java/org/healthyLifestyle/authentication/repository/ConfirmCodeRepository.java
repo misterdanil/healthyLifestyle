@@ -1,6 +1,6 @@
-package org.shop.authentication.repository;
+package org.healthyLifestyle.authentication.repository;
 
-import org.shop.authentication.model.ConfirmCode;
+import org.healthyLifestyle.authentication.model.ConfirmCode;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ConfirmCodeRepository extends CrudRepository<ConfirmCode, Long> {

@@ -1,9 +1,9 @@
-package org.shop.authentication.service.generator.impl;
+package org.healthyLifestyle.authentication.service.generator.impl;
 
 import java.util.Random;
 
-import org.shop.authentication.service.generator.ConfirmCodeGenerator;
-import org.shop.user.model.User;
+import org.healthyLifestyle.authentication.service.generator.ConfirmCodeGenerator;
+import org.healthylifestyle.user.model.User;
 import org.springframework.stereotype.Component;
 
 @Component

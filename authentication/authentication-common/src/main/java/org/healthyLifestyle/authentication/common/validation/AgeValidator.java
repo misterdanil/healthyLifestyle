@@ -5,12 +5,12 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneOffset;
 
-import org.shop.authentication.common.validation.annotation.Age;
+import org.healthyLifestyle.authentication.common.validation.annotation.Age;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class AgeValidator implements ConstraintValidator<Age, Instant> {
+public class AgeValidator implements ConstraintValidator<org.healthyLifestyle.authentication.common.validation.annotation.Age, Instant> {
 	private Integer age;
 
 	@Override

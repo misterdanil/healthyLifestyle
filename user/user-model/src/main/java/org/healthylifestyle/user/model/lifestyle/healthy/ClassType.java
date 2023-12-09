@@ -1,25 +1,79 @@
 package org.healthylifestyle.user.model.lifestyle.healthy;
 
 public enum ClassType {
-	STRING, SHORT, INTEGER, LONG, FLOAT, DOUBLE;
+	STRING {
 
-	public Short toShort(String value) {
-		return Short.valueOf(value);
-	}
+		@Override
+		public boolean isType(String value) {
+			return value != null && !value.isEmpty();
+		}
 
-	public Integer toInteger(String value) {
-		return Integer.valueOf(value);
-	}
+	},
+	SHORT {
 
-	public Long toLong(String value) {
-		return Long.valueOf(value);
-	}
+		@Override
+		public boolean isType(String value) {
+			try {
+				Short.parseShort(value);
+				return true;
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
 
-	public Float toFloat(String value) {
-		return Float.valueOf(value);
-	}
+	},
+	INTEGER {
 
-	public Double toDouble(String value) {
-		return Double.valueOf(value);
-	}
+		@Override
+		public boolean isType(String value) {
+			try {
+				Integer.parseInt(value);
+				return true;
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+
+	},
+	LONG {
+
+		@Override
+		public boolean isType(String value) {
+			try {
+				Long.parseLong(value);
+				return true;
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+
+	},
+	FLOAT {
+
+		@Override
+		public boolean isType(String value) {
+			try {
+				Float.parseFloat(value);
+				return true;
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+
+	},
+	DOUBLE {
+
+		@Override
+		public boolean isType(String value) {
+			try {
+				Double.parseDouble(value);
+				return true;
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+
+	};
+
+	public abstract boolean isType(String value);
 }

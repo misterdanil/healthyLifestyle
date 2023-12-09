@@ -1,7 +1,7 @@
 package org.healthyLifestyle.authentication.common.dto;
 
-import org.shop.authentication.model.RefreshToken;
-import org.shop.user.model.User;
+import org.healthyLifestyle.authentication.model.RefreshToken;
+import org.healthylifestyle.user.model.User;
 
 public class AuthenticationResult {
 	private User user;

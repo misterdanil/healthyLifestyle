@@ -5,6 +5,7 @@ import java.util.List;
 import org.healthylifestyle.common.Translation;
 import org.healthylifestyle.user.model.lifestyle.healthy.measure.Measure;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -14,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -26,8 +28,9 @@ public class ParameterType {
 	private Long id;
 	@Column(nullable = false)
 	private String originalTitle;
-	@JoinTable(name = "parameterType_translation", joinColumns = @JoinColumn(name = "parameterType_id"), inverseJoinColumns = @JoinColumn(name = "translation_id"))
-	private List<Translation> translationTitles;
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "parameter_type_id")
+	private List<Translation> translations;
 	@Column(nullable = false)
 	@Enumerated
 	private ClassType type;
@@ -51,12 +54,12 @@ public class ParameterType {
 		this.originalTitle = originalTitle;
 	}
 
-	public List<Translation> getTranslationTitles() {
-		return translationTitles;
+	public List<Translation> getTranslations() {
+		return translations;
 	}
 
-	public void setTranslationTitles(List<Translation> translationTitles) {
-		this.translationTitles = translationTitles;
+	public void setTranslations(List<Translation> translations) {
+		this.translations = translations;
 	}
 
 	public ClassType getType() {

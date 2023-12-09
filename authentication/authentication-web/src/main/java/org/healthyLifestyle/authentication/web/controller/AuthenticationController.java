@@ -1,16 +1,15 @@
-package org.shop.authentication.web.controller;
+package org.healthyLifestyle.authentication.web.controller;
 
-import org.shop.authentication.common.dto.AuthenticationRequest;
-import org.shop.authentication.common.dto.SignUpRequest;
-import org.shop.authentication.service.AuthenticationService;
-import org.shop.authentication.service.error.UnknownUserException;
-import org.shop.common.web.ErrorParser;
-import org.shop.common.web.ErrorResult;
-import org.shop.user.service.error.ValidationException;
+import org.healthyLifestyle.authentication.common.dto.AuthenticationRequest;
+import org.healthyLifestyle.authentication.common.dto.SignUpRequest;
+import org.healthyLifestyle.authentication.service.AuthenticationService;
+import org.healthyLifestyle.authentication.service.error.UnknownUserException;
+import org.healthylifestyle.common.dto.ErrorResult;
+import org.healthylifestyle.common.error.ValidationException;
+import org.healthylifestyle.common.web.ErrorParser;
+import org.healthylifestyle.common.web.ResponseEntityResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,11 +30,8 @@ public class AuthenticationController {
 		try {
 			authenticationService.login(authenticationRequest, request, response);
 		} catch (ValidationException e) {
-			BindingResult result = e.getResult();
 
-			ErrorResult errorResult = ErrorParser.getErrorResult(result);
-
-			return ResponseEntity.badRequest().body(errorResult);
+			return ResponseEntityResolver.getBuilder(e.getType()).body(e.getErrorResult());
 		}
 
 		return ResponseEntity.ok().build();
@@ -47,11 +43,8 @@ public class AuthenticationController {
 		try {
 			authenticationService.signUp(signUpRequest, request, response);
 		} catch (ValidationException e) {
-			BindingResult result = e.getResult();
 
-			ErrorResult errorResult = ErrorParser.getErrorResult(result);
-
-			return ResponseEntity.badRequest().body(errorResult);
+			return ResponseEntityResolver.getBuilder(e.getType()).body(e.getErrorResult());
 		}
 
 		return ResponseEntity.ok().build();

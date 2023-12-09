@@ -6,4 +6,16 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>authentication-web</artifactId>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.healthyLifestyle</groupId>
+  		<artifactId>authentication-common</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.healthyLifestyle</groupId>
+  		<artifactId>authentication-service</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
+  </dependencies>
 </project>

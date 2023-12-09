@@ -1,10 +1,10 @@
-package org.shop.authentication.service.impl;
+package org.healthyLifestyle.authentication.service.impl;
 
-import org.shop.authentication.model.ConfirmCode;
-import org.shop.authentication.repository.ConfirmCodeRepository;
-import org.shop.authentication.service.ConfirmCodeService;
-import org.shop.authentication.service.generator.ConfirmCodeGenerator;
-import org.shop.user.model.User;
+import org.healthyLifestyle.authentication.model.ConfirmCode;
+import org.healthyLifestyle.authentication.repository.ConfirmCodeRepository;
+import org.healthyLifestyle.authentication.service.ConfirmCodeService;
+import org.healthyLifestyle.authentication.service.generator.ConfirmCodeGenerator;
+import org.healthylifestyle.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

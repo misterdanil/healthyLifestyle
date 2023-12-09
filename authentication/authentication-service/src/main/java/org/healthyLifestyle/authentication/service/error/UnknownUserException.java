@@ -1,4 +1,4 @@
-package org.shop.authentication.service.error;
+package org.healthyLifestyle.authentication.service.error;
 
 public class UnknownUserException extends Exception {
 

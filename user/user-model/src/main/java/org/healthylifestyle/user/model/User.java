@@ -1,8 +1,11 @@
 package org.healthylifestyle.user.model;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.healthylifestyle.filesystem.model.Image;
+import org.healthylifestyle.user.model.lifestyle.healthy.Healthy;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,6 +37,8 @@ public class User {
 	private String email;
 	@Column(nullable = false, length = 255)
 	private String password;
+	@Column(name = "birth_date", nullable = false)
+	private Date birthDate;
 	@ManyToMany
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false))
 	private List<Role> roles;
@@ -42,6 +47,10 @@ public class User {
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "avatar_id")
 	private Image avatar;
+	@OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+	private Healthy healthy;
+	private String resourceId;
+	private String resourceName;
 
 	public Long getId() {
 		return id;
@@ -91,12 +100,34 @@ public class User {
 		this.password = password;
 	}
 
+	public Date getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(Date birthDate) {
+		this.birthDate = birthDate;
+	}
+
 	public List<Role> getRoles() {
 		return roles;
 	}
 
 	public void setRoles(List<Role> roles) {
 		this.roles = roles;
+	}
+
+	public void addRole(Role role) {
+		if (roles == null) {
+			roles = new ArrayList<>();
+		}
+		roles.add(role);
+	}
+
+	public void addRoles(List<Role> roles) {
+		if (this.roles == null) {
+			this.roles = new ArrayList<>();
+		}
+		roles.addAll(roles);
 	}
 
 	public boolean isEnabled() {
@@ -113,6 +144,30 @@ public class User {
 
 	public void setAvatar(Image avatar) {
 		this.avatar = avatar;
+	}
+
+	public Healthy getHealthy() {
+		return healthy;
+	}
+
+	public void setHealthy(Healthy healthy) {
+		this.healthy = healthy;
+	}
+
+	public String getResourceId() {
+		return resourceId;
+	}
+
+	public void setResourceId(String resourceId) {
+		this.resourceId = resourceId;
+	}
+
+	public String getResourceName() {
+		return resourceName;
+	}
+
+	public void setResourceName(String resourceName) {
+		this.resourceName = resourceName;
 	}
 
 }

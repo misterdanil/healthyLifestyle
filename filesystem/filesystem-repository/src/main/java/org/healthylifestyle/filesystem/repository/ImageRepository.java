@@ -9,6 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ImageRepository extends CrudRepository<Image, Long> {
+	@Query("select i from Image i where i.id in (:ids)")
+	List<Image> findAllById(List<Long> ids);
+
 	@Query("delete from Image i inner join Message m on m.images = i inner join m.chatUser cu where i.id in (:ids) and m = :message and cu.user = :user")
 	void deleteByMessage(List<Long> ids, Message message, User user);
 }

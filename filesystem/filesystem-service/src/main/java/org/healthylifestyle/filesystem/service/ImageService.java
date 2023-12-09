@@ -9,11 +9,19 @@ import org.healthylifestyle.filesystem.service.dto.ImageSavingRequest;
 import org.healthylifestyle.user.model.User;
 
 public interface ImageService {
+	Image findById(Long id);
+
 	List<Image> findAllByIdIn(List<Long> ids);
 
-	Image save(ImageSavingRequest savingRequest) throws ValidationException;
+	Image saveArticleFragmentImage(ImageSavingRequest savingRequest, String articleUuid, String fragmentUuid)
+			throws ValidationException;
+
+	Image saveChatImage(ImageSavingRequest savingRequest, String chatUuid) throws ValidationException;
+
+	Image saveMessageImage(ImageSavingRequest savingRequest, String chatUuid, String userUuid, String messageUuid)
+			throws ValidationException;
 
 	void remove(Image image);
-	
+
 	void deleteByMessage(List<Long> ids, Message message, User user);
 }

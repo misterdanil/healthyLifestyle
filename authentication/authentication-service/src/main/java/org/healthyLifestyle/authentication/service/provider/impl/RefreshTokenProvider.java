@@ -1,12 +1,12 @@
-package org.shop.authentication.service.provider.impl;
+package org.healthyLifestyle.authentication.service.provider.impl;
 
 import java.time.Instant;
 import java.util.Date;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import org.shop.authentication.model.RefreshToken;
-import org.shop.user.model.User;
+import org.healthyLifestyle.authentication.model.RefreshToken;
+import org.healthylifestyle.user.model.User;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;

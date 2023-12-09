@@ -14,17 +14,17 @@
 			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.shop</groupId>
-			<artifactId>user-modele</artifactId>
+			<groupId>org.healthyLifestyle</groupId>
+			<artifactId>user-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.shop</groupId>
-			<artifactId>authentication-modele</artifactId>
+			<groupId>org.healthyLifestyle</groupId>
+			<artifactId>authentication-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.shop</groupId>
+			<groupId>org.healthyLifestyle</groupId>
 			<artifactId>user-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>

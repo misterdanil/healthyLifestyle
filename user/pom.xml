@@ -11,5 +11,6 @@
   	<module>user-model</module>
   	<module>user-repository</module>
   	<module>user-service</module>
+  	<module>user-common</module>
   </modules>
 </project>

@@ -1,8 +1,8 @@
 package org.healthyLifestyle.authentication.common.dto;
 
-import java.time.Instant;
+import java.util.Date;
 
-import org.shop.authentication.common.validation.annotation.Age;
+import org.healthyLifestyle.authentication.common.validation.annotation.Age;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -20,7 +20,7 @@ public class SignUpRequest {
 	@Size(min = 8)
 	private String password;
 	@Age
-	private Instant birthDate;
+	private Date birthDate;
 
 	public String getFirstName() {
 		return firstName;
@@ -54,11 +54,11 @@ public class SignUpRequest {
 		this.password = password;
 	}
 
-	public Instant getBirthDate() {
+	public Date getBirthDate() {
 		return birthDate;
 	}
 
-	public void setBirthDate(Instant birthDate) {
+	public void setBirthDate(Date birthDate) {
 		this.birthDate = birthDate;
 	}
 

@@ -14,5 +14,6 @@
 		<module>communication-service</module>
 		<module>communication-repository</module>
 		<module>communication-common</module>
+		<module>communication-web</module>
 	</modules>
 </project>

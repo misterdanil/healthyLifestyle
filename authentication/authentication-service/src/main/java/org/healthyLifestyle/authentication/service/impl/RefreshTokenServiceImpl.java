@@ -1,9 +1,9 @@
-package org.shop.authentication.service.impl;
+package org.healthyLifestyle.authentication.service.impl;
 
-import org.shop.authentication.model.RefreshToken;
-import org.shop.authentication.repository.RefreshTokenRepository;
-import org.shop.authentication.service.RefreshTokenService;
-import org.shop.user.model.User;
+import org.healthyLifestyle.authentication.model.RefreshToken;
+import org.healthyLifestyle.authentication.repository.RefreshTokenRepository;
+import org.healthyLifestyle.authentication.service.RefreshTokenService;
+import org.healthylifestyle.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

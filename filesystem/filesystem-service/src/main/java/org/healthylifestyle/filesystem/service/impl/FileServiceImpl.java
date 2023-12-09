@@ -1,5 +1,7 @@
 package org.healthylifestyle.filesystem.service.impl;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +36,6 @@ public class FileServiceImpl implements FileService {
 	@PostConstruct
 	public void init() {
 		ABSOLUTE_PATH = messageSource.getMessage("filesystem.path", null, null);
-
 	}
 
 	@Override
@@ -74,6 +75,35 @@ public class FileServiceImpl implements FileService {
 							path.toString()));
 		}
 		file.setType(FilenameUtils.getExtension(fileName));
+
+		file = fileRepository.save(file);
+
+		return file;
+	}
+
+	@Override
+	public File save(String filename, String textFile, String relativePath) {
+		Path path = Paths.get(ABSOLUTE_PATH, relativePath, filename);
+
+		try (BufferedWriter w = new BufferedWriter(new FileWriter(path.toString()))) {
+			w.write(textFile);
+		} catch (IOException e) {
+			throw new RuntimeException(
+					String.format("Exception occurred while saving file by path '%s'. Couldn't save file to filesystem",
+							path.toString()),
+					e);
+		}
+
+		File file = new File();
+		file.setRelativePath(Paths.get(relativePath, filename).toString());
+		try {
+			file.setMimeType(Files.probeContentType(path));
+		} catch (IOException e) {
+			throw new RuntimeException(
+					String.format("Exception occurred while saving file. Couldn't extract mime type from path '%s'",
+							path.toString()));
+		}
+		file.setType(FilenameUtils.getExtension(relativePath));
 
 		file = fileRepository.save(file);
 

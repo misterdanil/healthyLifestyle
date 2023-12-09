@@ -1,8 +1,8 @@
 package org.healthyLifestyle.authentication.common.mapper;
 
+import org.healthyLifestyle.authentication.common.dto.RefreshTokenDto;
+import org.healthyLifestyle.authentication.model.RefreshToken;
 import org.mapstruct.Mapper;
-import org.shop.authentication.common.dto.RefreshTokenDto;
-import org.shop.authentication.model.RefreshToken;
 
 @Mapper
 public interface RefreshTokenMapper {

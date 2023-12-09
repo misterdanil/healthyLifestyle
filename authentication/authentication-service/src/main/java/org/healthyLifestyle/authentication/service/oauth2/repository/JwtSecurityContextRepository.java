@@ -1,4 +1,4 @@
-package org.shop.authentication.service.oauth2.repository;
+package org.healthyLifestyle.authentication.service.oauth2.repository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,16 +8,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.shop.authentication.common.dto.AccessToken;
-import org.shop.authentication.common.dto.SignUpRequest;
-import org.shop.authentication.model.RefreshToken;
-import org.shop.authentication.service.RefreshTokenService;
-import org.shop.authentication.service.provider.impl.AccessTokenProvider;
-import org.shop.authentication.service.provider.impl.RefreshTokenProvider;
-import org.shop.user.model.User;
-import org.shop.user.service.UserService;
-import org.shop.user.service.error.OAuth2UserExistException;
-import org.shop.user.service.util.RoleUtil;
+import org.healthyLifestyle.authentication.common.dto.AccessToken;
+import org.healthyLifestyle.authentication.common.dto.SignUpRequest;
+import org.healthyLifestyle.authentication.model.RefreshToken;
+import org.healthyLifestyle.authentication.service.RefreshTokenService;
+import org.healthyLifestyle.authentication.service.provider.impl.AccessTokenProvider;
+import org.healthyLifestyle.authentication.service.provider.impl.RefreshTokenProvider;
+import org.healthylifestyle.user.model.User;
+import org.healthylifestyle.user.service.UserService;
+import org.healthylifestyle.user.service.error.OAuth2UserExistException;
+import org.healthylifestyle.user.service.util.RoleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,11 +80,11 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 
 	private String getToken(String name, HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
-		
-		if(cookies == null) {
+
+		if (cookies == null) {
 			return null;
 		}
-		
+
 		for (Cookie cookie : cookies) {
 			if (cookie.getName().equals(name)) {
 				return cookie.getValue();
@@ -195,7 +195,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 		signUpRequest.setFirstName(firstName);
 		signUpRequest.setLastName(lastName);
 		signUpRequest.setEmail(email);
-		signUpRequest.setBirthDate(birthDate.toInstant());
+		signUpRequest.setBirthDate(birthDate);
 
 		User user = userService.save(signUpRequest, id, authenticationToken.getAuthorizedClientRegistrationId());
 

@@ -1,5 +1,7 @@
 package org.healthyLifestyle.authentication.model;
 
+import org.healthylifestyle.user.model.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

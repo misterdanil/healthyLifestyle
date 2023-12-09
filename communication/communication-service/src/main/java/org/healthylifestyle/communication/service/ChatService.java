@@ -27,6 +27,8 @@ public interface ChatService {
 
 	void addUser(AddingUserRequest addingRequest) throws ValidationException;
 
+	void inviteUser(Long chatId, Long userId) throws ValidationException;
+
 	void joinByInvitation(JoiningChatRequest joiningRequest) throws ValidationException;
 
 	void leave(LeavingChatRequest leavingRequest) throws ValidationException;
@@ -36,12 +38,12 @@ public interface ChatService {
 	void attachEvent(AttachEventRequest attachRequest) throws ValidationException;
 
 	boolean isMember(Chat chat, User user);
-	
+
 	boolean isMember(Long chatId, Long userId);
 
 	boolean isAdmin(Chat chat, User user);
 
 	boolean isOwner(Chat chat, User user);
-	
+
 	Chat findByMessage(Long messageId);
 }

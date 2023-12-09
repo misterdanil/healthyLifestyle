@@ -12,9 +12,17 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
 	User findByUsername(String username);
 
+	User findByEmail(String email);
+
 	@Query("select count(*) from user u where u.id in :ids")
 	int countAllByIdIn(List<Long> ids);
 
 	@Query("select * from user u where u.id in :ids")
 	List<User> findAllByIds(List<Long> ids);
+
+	User findByResourceIdAndResourceName(String oauth2Id, String oauth2Resource);
+
+	boolean existsByEmail(String email);
+
+	boolean existsByResourceIdAndResourceName(String oauth2Id, String oauth2Resource);
 }

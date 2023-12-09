@@ -1,11 +1,13 @@
 package org.healthylifestyle.copywriting.model.mark;
 
+import org.healthylifestyle.copywriting.model.Article;
 import org.healthylifestyle.user.model.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -21,6 +23,9 @@ public class Mark {
 	@OneToOne
 	@JoinColumn(name = "user_id")
 	private User user;
+	@ManyToOne
+	@JoinColumn(name = "article_id", nullable = false)
+	private Article article;
 
 	public Long getId() {
 		return id;
@@ -40,6 +45,14 @@ public class Mark {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public Article getArticle() {
+		return article;
+	}
+
+	public void setArticle(Article article) {
+		this.article = article;
 	}
 
 }

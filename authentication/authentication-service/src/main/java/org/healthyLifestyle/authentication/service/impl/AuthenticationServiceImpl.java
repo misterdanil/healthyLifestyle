@@ -1,20 +1,20 @@
-package org.shop.authentication.service.impl;
+package org.healthyLifestyle.authentication.service.impl;
 
-import org.shop.authentication.common.dto.AuthenticationRequest;
-import org.shop.authentication.common.dto.SignUpRequest;
-import org.shop.authentication.model.ConfirmCode;
-import org.shop.authentication.model.RefreshToken;
-import org.shop.authentication.service.AuthenticationService;
-import org.shop.authentication.service.ConfirmCodeService;
-import org.shop.authentication.service.RefreshTokenService;
-import org.shop.authentication.service.error.UnknownUserException;
-import org.shop.authentication.service.oauth2.repository.JwtSecurityContextRepository;
-import org.shop.authentication.service.provider.impl.RefreshTokenProvider;
-import org.shop.user.model.User;
-import org.shop.user.service.UserService;
-import org.shop.user.service.error.OAuth2UserExistException;
-import org.shop.user.service.error.ValidationException;
-import org.shop.user.service.util.RoleUtil;
+import org.healthyLifestyle.authentication.common.dto.AuthenticationRequest;
+import org.healthyLifestyle.authentication.common.dto.SignUpRequest;
+import org.healthyLifestyle.authentication.model.ConfirmCode;
+import org.healthyLifestyle.authentication.service.AuthenticationService;
+import org.healthyLifestyle.authentication.service.ConfirmCodeService;
+import org.healthyLifestyle.authentication.service.RefreshTokenService;
+import org.healthyLifestyle.authentication.service.error.UnknownUserException;
+import org.healthyLifestyle.authentication.service.provider.impl.RefreshTokenProvider;
+import org.healthylifestyle.common.error.Type;
+import org.healthylifestyle.common.error.ValidationException;
+import org.healthylifestyle.common.web.ErrorParser;
+import org.healthylifestyle.user.model.User;
+import org.healthylifestyle.user.service.UserService;
+import org.healthylifestyle.user.service.error.OAuth2UserExistException;
+import org.healthylifestyle.user.service.util.RoleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -68,12 +68,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		User user = userService.findByEmail(email);
 		if (user == null) {
 			bindingResult.rejectValue("email", "email.not_exists", "email not exists");
-			throw new ValidationException(bindingResult);
+			ErrorParser.checkErrors(bindingResult, null, Type.NOT_FOUND);
 		}
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {
 			bindingResult.rejectValue("password", "password.mismatch", "password is mismatch");
-			throw new ValidationException(bindingResult);
+			ErrorParser.checkErrors(bindingResult, null, Type.NOT_FOUND);
 		}
 
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user.getId(),

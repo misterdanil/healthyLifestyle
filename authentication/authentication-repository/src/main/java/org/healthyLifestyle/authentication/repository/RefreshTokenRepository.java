@@ -1,7 +1,7 @@
-package org.shop.authentication.repository;
+package org.healthyLifestyle.authentication.repository;
 
-import org.shop.authentication.model.RefreshToken;
-import org.shop.user.model.User;
+import org.healthyLifestyle.authentication.model.RefreshToken;
+import org.healthylifestyle.user.model.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

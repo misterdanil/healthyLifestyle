@@ -1,4 +1,4 @@
-package org.shop.authentication.service.config;
+package org.healthyLifestyle.authentication.service.config;
 
 import java.util.Arrays;
 import java.util.List;

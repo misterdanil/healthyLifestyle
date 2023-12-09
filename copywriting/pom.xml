@@ -11,5 +11,8 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>copywriting-model</module>
+		<module>copywriting-service</module>
+		<module>copywriting-common</module>
+		<module>copywriting-repository</module>
 	</modules>
 </project>

@@ -1,5 +1,6 @@
 package org.healthylifestyle.communication.service.impl;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +27,8 @@ import org.healthylifestyle.communication.model.settings.Setting;
 import org.healthylifestyle.communication.repository.ChatRepository;
 import org.healthylifestyle.communication.service.ChatService;
 import org.healthylifestyle.communication.service.ChatUserService;
+import org.healthylifestyle.event.model.Event;
+import org.healthylifestyle.event.service.EventService;
 import org.healthylifestyle.filesystem.model.Image;
 import org.healthylifestyle.filesystem.service.ImageService;
 import org.healthylifestyle.filesystem.service.dto.ImageSavingRequest;
@@ -33,9 +36,7 @@ import org.healthylifestyle.notification.model.ChatNotification;
 import org.healthylifestyle.notification.service.ChatNotificationService;
 import org.healthylifestyle.user.model.Role;
 import org.healthylifestyle.user.model.User;
-import org.healthylifestyle.user.model.lifestyle.healthy.event.Event;
 import org.healthylifestyle.user.repository.RoleRepository;
-import org.healthylifestyle.user.service.EventService;
 import org.healthylifestyle.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -141,11 +142,10 @@ public class ChatServiceImpl implements ChatService {
 
 		chat.setSetting(setting);
 
+		String path = MessageFormat.format("/chats/{0}", chat.getUuid());
 		ImageSavingRequest imageSavingRequest = new ImageSavingRequest();
-		imageSavingRequest
-				.setRelativePath(messageSource.getMessage("chat.image.path", new Object[] { chat.getUuid() }, null));
-
-		Image avatar = imageService.save(imageSavingRequest);
+		imageSavingRequest.setFile(image);
+		Image avatar = imageService.saveChatImage(imageSavingRequest, path);
 		chat.setImage(avatar);
 
 		Chat savedChat = chatRepository.save(chat);
@@ -209,12 +209,13 @@ public class ChatServiceImpl implements ChatService {
 			if (multipartFile != null) {
 				imageService.remove(chat.getImage());
 
+				String path = MessageFormat.format("/chats/{0}", chat.getUuid());
 				ImageSavingRequest imageSavingRequest = new ImageSavingRequest();
 				imageSavingRequest.setFile(multipartFile);
-				imageSavingRequest.setRelativePath(
-						messageSource.getMessage("chat.image.path", new Object[] { chat.getUuid() }, null));
+				Image avatar = imageService.saveChatImage(imageSavingRequest, path);
 
-				imageService.save(imageSavingRequest);
+				chat.setImage(avatar);
+				imageService.saveChatImage(imageSavingRequest, path);
 			}
 
 			if (updatingRequest.getTitle() != null && !updatingRequest.getTitle().isEmpty()) {
@@ -326,6 +327,23 @@ public class ChatServiceImpl implements ChatService {
 
 	private void reject(String code, BindingResult validationResult, Object... args) {
 		validationResult.reject(code, messageSource.getMessage(code, args, LocaleContextHolder.getLocale()));
+	}
+
+	@Override
+	public void inviteUser(Long chatId, Long userId) throws ValidationException {
+		User user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+
+		Chat chat = chatRepository.findById(chatId).orElse(null);
+		if (chat == null) {
+			throw new ValidationException(null, null, Type.NOT_FOUND);
+		}
+
+		User to = userService.findById(userId);
+		if (to == null) {
+			throw new ValidationException(null, null, Type.NOT_FOUND);
+		}
+
+		chatNotificationService.save(chat, user, to);
 	}
 
 	@Override
@@ -541,7 +559,5 @@ public class ChatServiceImpl implements ChatService {
 	public Chat findByMessage(Long messageId) {
 		return chatRepository.findByMessage(messageId);
 	}
-	
-	
 
 }

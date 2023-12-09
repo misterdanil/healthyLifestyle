@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.shop.authentication.common.validation.AgeValidator;
+import org.healthyLifestyle.authentication.common.validation.AgeValidator;
 
 import jakarta.validation.Constraint;
 

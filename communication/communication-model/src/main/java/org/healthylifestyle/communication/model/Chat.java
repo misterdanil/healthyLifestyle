@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.healthylifestyle.communication.model.settings.Setting;
+import org.healthylifestyle.event.model.Event;
 import org.healthylifestyle.filesystem.model.Image;
-import org.healthylifestyle.user.model.lifestyle.healthy.event.Event;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

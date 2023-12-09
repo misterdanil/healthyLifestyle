@@ -21,6 +21,7 @@ public class ChatCreatingRequest {
 	private Modification modification;
 	@NotNull(message = "{setting.privacy}")
 	private Privacy privacy;
+	private Long imageId;
 
 	public String getTitle() {
 		return title;
@@ -60,6 +61,14 @@ public class ChatCreatingRequest {
 
 	public void setPrivacy(Privacy privacy) {
 		this.privacy = privacy;
+	}
+
+	public Long getImageId() {
+		return imageId;
+	}
+
+	public void setImageId(Long imageId) {
+		this.imageId = imageId;
 	}
 
 }

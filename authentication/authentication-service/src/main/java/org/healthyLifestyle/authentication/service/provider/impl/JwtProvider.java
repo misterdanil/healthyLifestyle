@@ -1,10 +1,10 @@
-package org.shop.authentication.service.provider.impl;
+package org.healthyLifestyle.authentication.service.provider.impl;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import org.shop.authentication.service.provider.TokenProvider;
-import org.shop.user.model.User;
-import org.shop.user.service.UserService;
+import org.healthyLifestyle.authentication.service.provider.TokenProvider;
+import org.healthylifestyle.user.model.User;
+import org.healthylifestyle.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;

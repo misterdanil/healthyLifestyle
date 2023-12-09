@@ -1,6 +1,6 @@
-package org.shop.authentication.service.provider;
+package org.healthyLifestyle.authentication.service.provider;
 
-import org.shop.user.model.User;
+import org.healthylifestyle.user.model.User;
 
 public interface TokenProvider<T> {
 	T generateToken(User user);

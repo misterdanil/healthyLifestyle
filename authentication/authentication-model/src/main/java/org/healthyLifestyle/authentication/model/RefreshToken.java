@@ -2,7 +2,7 @@ package org.healthyLifestyle.authentication.model;
 
 import java.util.Date;
 
-import org.shop.user.model.User;
+import org.healthylifestyle.user.model.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

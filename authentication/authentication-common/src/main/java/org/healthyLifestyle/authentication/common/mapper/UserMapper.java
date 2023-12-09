@@ -1,8 +1,8 @@
 package org.healthyLifestyle.authentication.common.mapper;
 
+import org.healthylifestyle.user.common.dto.UserDto;
+import org.healthylifestyle.user.model.User;
 import org.mapstruct.Mapper;
-import org.shop.user.common.dto.UserDto;
-import org.shop.user.model.User;
 
 @Mapper
 public interface UserMapper {

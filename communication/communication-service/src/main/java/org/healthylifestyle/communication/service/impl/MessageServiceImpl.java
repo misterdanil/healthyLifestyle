@@ -12,12 +12,10 @@ import org.healthylifestyle.communication.common.dto.message.UpdateMessageReques
 import org.healthylifestyle.communication.model.Chat;
 import org.healthylifestyle.communication.model.ChatUser;
 import org.healthylifestyle.communication.model.Message;
-import org.healthylifestyle.communication.model.Reaction;
 import org.healthylifestyle.communication.repository.MessageRepository;
 import org.healthylifestyle.communication.service.ChatService;
 import org.healthylifestyle.communication.service.ChatUserService;
 import org.healthylifestyle.communication.service.MessageService;
-import org.healthylifestyle.communication.service.ReactionService;
 import org.healthylifestyle.filesystem.model.Image;
 import org.healthylifestyle.filesystem.model.Video;
 import org.healthylifestyle.filesystem.model.Voice;

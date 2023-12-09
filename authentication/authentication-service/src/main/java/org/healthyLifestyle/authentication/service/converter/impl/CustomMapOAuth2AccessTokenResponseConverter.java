@@ -1,4 +1,4 @@
-package org.shop.authentication.service.converter.impl;
+package org.healthyLifestyle.authentication.service.converter.impl;
 
 import java.util.Arrays;
 import java.util.Collections;

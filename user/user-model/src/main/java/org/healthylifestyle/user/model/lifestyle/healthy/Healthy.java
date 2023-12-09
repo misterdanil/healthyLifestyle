@@ -2,6 +2,8 @@ package org.healthylifestyle.user.model.lifestyle.healthy;
 
 import java.util.List;
 
+import org.healthylifestyle.user.model.User;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -22,6 +25,9 @@ public class Healthy {
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "healthy_id", nullable = false)
 	private List<Parameter> parameters;
+	@OneToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
 	public Long getId() {
 		return id;

@@ -1,7 +1,7 @@
-package org.shop.authentication.service;
+package org.healthyLifestyle.authentication.service;
 
-import org.shop.authentication.model.RefreshToken;
-import org.shop.user.model.User;
+import org.healthyLifestyle.authentication.model.RefreshToken;
+import org.healthylifestyle.user.model.User;
 
 public interface RefreshTokenService {
 	RefreshToken save(RefreshToken refreshToken);

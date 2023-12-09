@@ -28,6 +28,7 @@
 		<module>communication</module>
 		<module>common</module>
 		<module>notification</module>
+		<module>event</module>
 	</modules>
 	<dependencies>
 		<dependency>

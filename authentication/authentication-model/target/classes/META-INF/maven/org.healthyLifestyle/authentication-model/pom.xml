@@ -9,4 +9,11 @@
 	</parent>
 	<artifactId>authentication-model</artifactId>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.healthyLifestyle</groupId>
+			<artifactId>user-model</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 </project>

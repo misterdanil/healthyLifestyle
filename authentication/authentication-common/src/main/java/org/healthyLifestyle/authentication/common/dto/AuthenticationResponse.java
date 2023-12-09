@@ -1,6 +1,6 @@
 package org.healthyLifestyle.authentication.common.dto;
 
-import org.shop.user.common.dto.UserDto;
+import org.healthylifestyle.user.common.dto.UserDto;
 
 public class AuthenticationResponse {
 	private UserDto user;

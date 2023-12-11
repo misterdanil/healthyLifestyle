@@ -57,6 +57,9 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 
 		if (token != null) {
 			User user = accessTokenProvider.decryptToken(token);
+			if (user == null) {
+				return null;
+			}
 
 			Authentication authentication = new UsernamePasswordAuthenticationToken(user.getId(), user.getPassword(),
 					RoleUtil.getAuthorities(user));
@@ -65,20 +68,10 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 			return securityContext;
 		}
 
-		token = getToken(REFRESH_TOKEN_NAME, request);
-		if (token != null) {
-			User user = refreshTokenProvider.decryptToken(token);
-
-			Authentication authentication = new UsernamePasswordAuthenticationToken(user.getId(), user.getPassword());
-			SecurityContext securityContext = new SecurityContextImpl(authentication);
-
-			return securityContext;
-		}
-
 		return null;
 	}
 
-	private String getToken(String name, HttpServletRequest request) {
+	public static String getToken(String name, HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
 
 		if (cookies == null) {
@@ -108,6 +101,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 
 		AccessToken accessToken = accessTokenProvider.generateToken(user);
 		RefreshToken refreshToken = refreshTokenProvider.generateToken(user);
+		refreshTokenService.removeByUser(user);
 		refreshToken = refreshTokenService.save(refreshToken);
 
 		List<Cookie> accessTokenCookies = createAccessTokenCookies(accessToken);

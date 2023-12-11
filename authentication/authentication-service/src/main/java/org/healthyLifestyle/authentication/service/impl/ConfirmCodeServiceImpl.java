@@ -43,4 +43,9 @@ public class ConfirmCodeServiceImpl implements ConfirmCodeService {
 
 	}
 
+	@Override
+	public void delete(ConfirmCode code) {
+		codeRepository.delete(code);
+	}
+
 }

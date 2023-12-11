@@ -2,7 +2,7 @@ package org.healthyLifestyle.authentication.common.dto;
 
 public class RefreshTokenDto {
 	private Long id;
-	private String code;
+	private String token;
 
 	public Long getId() {
 		return id;
@@ -12,12 +12,12 @@ public class RefreshTokenDto {
 		this.id = id;
 	}
 
-	public String getCode() {
-		return code;
+	public String getToken() {
+		return token;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setToken(String token) {
+		this.token = token;
 	}
 
 }

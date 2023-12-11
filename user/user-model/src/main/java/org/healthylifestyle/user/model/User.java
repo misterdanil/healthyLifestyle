@@ -10,6 +10,7 @@ import org.healthylifestyle.user.model.lifestyle.healthy.Healthy;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +22,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "_user")
 public class User {
 	@Id
 	@SequenceGenerator(name = "user_id_generator", sequenceName = "user_sequence", initialValue = 1, allocationSize = 20)
@@ -31,15 +32,15 @@ public class User {
 	private String firstName;
 	@Column(nullable = false, length = 32)
 	private String lastName;
-	@Column(nullable = false, length = 32)
+	@Column(length = 32)
 	private String username;
-	@Column(nullable = false, length = 255)
+	@Column(length = 255)
 	private String email;
-	@Column(nullable = false, length = 255)
+	@Column(length = 255)
 	private String password;
-	@Column(name = "birth_date", nullable = false)
+	@Column(name = "birth_date")
 	private Date birthDate;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false))
 	private List<Role> roles;
 	@Column(nullable = false)
@@ -127,7 +128,7 @@ public class User {
 		if (this.roles == null) {
 			this.roles = new ArrayList<>();
 		}
-		roles.addAll(roles);
+		this.roles.addAll(roles);
 	}
 
 	public boolean isEnabled() {

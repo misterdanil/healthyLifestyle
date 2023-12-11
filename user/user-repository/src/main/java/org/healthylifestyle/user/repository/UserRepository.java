@@ -14,10 +14,10 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
 	User findByEmail(String email);
 
-	@Query("select count(*) from user u where u.id in :ids")
+	@Query("select count(u) from User u where u.id in (:ids)")
 	int countAllByIdIn(List<Long> ids);
 
-	@Query("select * from user u where u.id in :ids")
+	@Query("select u from User u where u.id in (:ids)")
 	List<User> findAllByIds(List<Long> ids);
 
 	User findByResourceIdAndResourceName(String oauth2Id, String oauth2Resource);

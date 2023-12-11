@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.healthyLifestyle.authentication.service.converter.impl.CustomMappingJackson2HttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,8 +27,6 @@ public class AuthenticationSecurityConfig {
 	private OAuth2AuthorizationCodeGrantRequestEntityConverter codeGrantRequestEntityConverter;
 	@Autowired
 	private Converter<Map<String, Object>, OAuth2AccessTokenResponse> oauth2AccessTokenResponseConverter;
-	@Autowired
-	private MappingJackson2HttpMessageConverter jackson2HttpMessageConverter;
 
 	@Bean
 	public PasswordEncoder bCryptPasswordEncoder() {
@@ -57,7 +56,7 @@ public class AuthenticationSecurityConfig {
 		List<HttpMessageConverter<?>> messageConverters = restTemplate.getMessageConverters();
 
 		messageConverters.removeIf(e -> e instanceof MappingJackson2HttpMessageConverter);
-		messageConverters.add(jackson2HttpMessageConverter);
+		messageConverters.add(new CustomMappingJackson2HttpMessageConverter());
 
 		oauth2UserService.setRestOperations(restTemplate);
 		return oauth2UserService;

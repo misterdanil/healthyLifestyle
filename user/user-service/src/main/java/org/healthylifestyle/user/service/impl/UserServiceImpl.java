@@ -13,9 +13,14 @@ import org.healthylifestyle.user.service.RoleService;
 import org.healthylifestyle.user.service.UserService;
 import org.healthylifestyle.user.service.error.OAuth2UserExistException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -23,10 +28,12 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 	@Autowired
 	private RoleService roleService;
+	@Autowired
+	private Environment env;
 
 	@Override
 	public User findById(Long id) {
-		return userRepository.findById(id).get();
+		return userRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -38,7 +45,9 @@ public class UserServiceImpl implements UserService {
 		}
 
 		if (bindingResult.hasErrors()) {
-			ValidationException validationException = new ValidationException(null, bindingResult, Type.BAD_REQUEST);
+			ValidationException validationException = new ValidationException(
+					"Exception occurred while saving user. The user with this email '%s' already exists", bindingResult,
+					Type.BAD_REQUEST, signUpRequest.getEmail());
 
 			throw validationException;
 		}
@@ -66,16 +75,25 @@ public class UserServiceImpl implements UserService {
 		User user = createUser(signUpRequest, Arrays.asList(userRole, oauth2UserRole));
 		user.setResourceId(resourceId);
 		user.setResourceName(resourceName);
+		
+		user = userRepository.save(user);
 
 		return user;
 	}
-	
+
+	@Override
+	public User save(User user) {
+		return userRepository.save(user);
+	}
+
 	private User createUser(SignUpRequest signUpRequest, List<Role> roles) {
 		User user = new User();
 		user.setFirstName(signUpRequest.getFirstName());
 		user.setLastName(signUpRequest.getLastName());
+		user.setUsername(signUpRequest.getUsername());
 		user.setBirthDate(signUpRequest.getBirthDate());
 		user.setEmail(signUpRequest.getEmail());
+		user.setPassword(signUpRequest.getPassword());
 		user.addRoles(roles);
 
 		return user;

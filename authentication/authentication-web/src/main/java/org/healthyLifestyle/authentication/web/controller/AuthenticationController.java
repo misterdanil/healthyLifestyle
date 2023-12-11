@@ -6,11 +6,11 @@ import org.healthyLifestyle.authentication.service.AuthenticationService;
 import org.healthyLifestyle.authentication.service.error.UnknownUserException;
 import org.healthylifestyle.common.dto.ErrorResult;
 import org.healthylifestyle.common.error.ValidationException;
-import org.healthylifestyle.common.web.ErrorParser;
 import org.healthylifestyle.common.web.ResponseEntityResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +38,7 @@ public class AuthenticationController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<?> login(@RequestBody SignUpRequest signUpRequest, HttpServletRequest request,
+	public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest, HttpServletRequest request,
 			HttpServletResponse response) {
 		try {
 			authenticationService.signUp(signUpRequest, request, response);
@@ -59,5 +59,16 @@ public class AuthenticationController {
 		}
 
 		return ResponseEntity.ok().build();
+	}
+
+	@DeleteMapping("/user/*/confirm/{code}")
+	public ResponseEntity<ErrorResult> confirm(@PathVariable String code) {
+		try {
+			authenticationService.confirmAccount(code);
+		} catch (ValidationException e) {
+			return ResponseEntityResolver.getBuilder(e.getType()).body(e.getErrorResult());
+		}
+
+		return ResponseEntity.status(204).build();
 	}
 }

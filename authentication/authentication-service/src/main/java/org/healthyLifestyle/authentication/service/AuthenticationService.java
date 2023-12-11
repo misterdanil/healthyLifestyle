@@ -17,7 +17,9 @@ public interface AuthenticationService {
 			throws ValidationException;
 
 	public void signUp(SignUpRequest signUpRequest, String resourceId, String resourceName, HttpServletRequest request,
-			HttpServletResponse response) throws OAuth2UserExistException;
+			HttpServletResponse response) throws OAuth2UserExistException, ValidationException;
 
 	public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws UnknownUserException;
+
+	void confirmAccount(String code) throws ValidationException;
 }

@@ -1,36 +1,28 @@
 package org.healthyLifestyle.authentication.service.provider.impl;
 
-import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
 
 import org.healthyLifestyle.authentication.service.provider.TokenProvider;
 import org.healthylifestyle.user.model.User;
 import org.healthylifestyle.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
+import io.jsonwebtoken.security.Keys;
 
-@PropertySource(value = "classpath:access_token.properties")
+@Component
+@Scope("prototype")
 public abstract class JwtProvider<T> implements TokenProvider<T> {
-	@Resource
-	private Environment env;
 	private Long expirationTimeMillis;
 	private String secretKey;
 	private String algorithm;
 	@Autowired
 	private UserService userService;
-
-	@PostConstruct
-	public void init() {
-		expirationTimeMillis = env.getProperty("exp", Long.class);
-		secretKey = env.getProperty("secret_key");
-		algorithm = env.getProperty("algorithm");
-	}
 
 	public String getSecretKey() {
 		return secretKey;
@@ -44,10 +36,27 @@ public abstract class JwtProvider<T> implements TokenProvider<T> {
 		return expirationTimeMillis;
 	}
 
+	public void setExpirationTimeMillis(Long expirationTimeMillis) {
+		this.expirationTimeMillis = expirationTimeMillis;
+	}
+
+	public void setSecretKey(String secretKey) {
+		this.secretKey = secretKey;
+	}
+
+	public void setAlgorithm(String algorithm) {
+		this.algorithm = algorithm;
+	}
+
 	@Override
 	public User decryptToken(String token) {
-		Jws<Claims> jws = Jwts.parserBuilder().setSigningKey(new SecretKeySpec(secretKey.getBytes(), algorithm)).build()
-				.parseClaimsJws(token);
+		Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
+		Jws<Claims> jws;
+		try {
+			jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+		} catch (ExpiredJwtException e) {
+			return null;
+		}
 		String id = jws.getBody().getSubject();
 		User user = userService.findById(Long.parseLong(id));
 

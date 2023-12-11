@@ -7,6 +7,8 @@ import org.healthylifestyle.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 	@Autowired
@@ -18,6 +20,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 	}
 
 	@Override
+	@Transactional
 	public void removeByUser(User user) {
 		refreshTokenRepository.removeByUser(user);
 	}

@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.2</version>
+		<version>3.2.0</version>
 		<relativePath />
 	</parent>
 	<modules>
@@ -29,6 +29,7 @@
 		<module>common</module>
 		<module>notification</module>
 		<module>event</module>
+		<module>app</module>
 	</modules>
 	<dependencies>
 		<dependency>

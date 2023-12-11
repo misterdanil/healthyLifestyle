@@ -5,6 +5,7 @@ import java.util.Date;
 import org.healthyLifestyle.authentication.common.validation.annotation.Age;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -15,6 +16,8 @@ public class SignUpRequest {
 	@Pattern(regexp = "\\p{Lu}\\p{L}+")
 	@Size(max = 128)
 	private String lastName;
+	@NotBlank
+	private String username;
 	@Email
 	private String email;
 	@Size(min = 8)
@@ -36,6 +39,14 @@ public class SignUpRequest {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public String getEmail() {

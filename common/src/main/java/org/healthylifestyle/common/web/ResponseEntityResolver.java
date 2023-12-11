@@ -13,8 +13,10 @@ public class ResponseEntityResolver {
 			return ResponseEntity.badRequest();
 		} else if (type.equals(Type.FORBIDDEN)) {
 			return ResponseEntity.status(403);
-		} else {
+		} else if (type.equals(Type.NOT_FOUND)) {
 			return ResponseEntity.status(404);
+		} else {
+			return ResponseEntity.status(409);
 		}
 	}
 }

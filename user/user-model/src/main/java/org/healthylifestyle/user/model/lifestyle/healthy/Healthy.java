@@ -22,8 +22,7 @@ public class Healthy {
 	@SequenceGenerator(name = "healthy_id_generator", sequenceName = "healthy_sequence", initialValue = 1, allocationSize = 20)
 	@GeneratedValue(generator = "healthy_id_generator", strategy = GenerationType.SEQUENCE)
 	private Long id;
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "healthy_id", nullable = false)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "healthy")
 	private List<Parameter> parameters;
 	@OneToOne
 	@JoinColumn(name = "user_id", nullable = false)

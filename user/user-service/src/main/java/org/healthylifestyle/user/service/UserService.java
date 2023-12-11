@@ -9,7 +9,7 @@ import org.healthylifestyle.user.service.error.OAuth2UserExistException;
 
 public interface UserService {
 	User findById(Long id);
-	
+
 	User findByEmail(String email);
 
 	User findByUsername(String username);
@@ -27,4 +27,6 @@ public interface UserService {
 	boolean existsByResourceIdAndResourceName(String resourceId, String resourceName);
 
 	User save(SignUpRequest signUpRequest) throws ValidationException;
+
+	User save(User user);
 }

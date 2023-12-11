@@ -7,4 +7,6 @@ public interface ConfirmCodeService {
 	ConfirmCode findByUserId(Long userId);
 
 	ConfirmCode save(User user);
+	
+	void delete(ConfirmCode code);
 }

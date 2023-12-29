@@ -6,5 +6,5 @@ import org.healthylifestyle.filesystem.model.Css;
 public interface CssService {
 	Css findById(Long id);
 	
-	Css saveArticleFragmentCss(SaveCssRequest saveRequest);
+	Css saveArticleFragmentCss(SaveCssRequest saveRequest, String articleUuid, String fragmentUuid);
 }

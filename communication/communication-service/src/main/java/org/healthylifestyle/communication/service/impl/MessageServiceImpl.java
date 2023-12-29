@@ -13,7 +13,6 @@ import org.healthylifestyle.communication.model.Chat;
 import org.healthylifestyle.communication.model.ChatUser;
 import org.healthylifestyle.communication.model.Message;
 import org.healthylifestyle.communication.repository.MessageRepository;
-import org.healthylifestyle.communication.service.ChatService;
 import org.healthylifestyle.communication.service.ChatUserService;
 import org.healthylifestyle.communication.service.MessageService;
 import org.healthylifestyle.filesystem.model.Image;
@@ -22,10 +21,14 @@ import org.healthylifestyle.filesystem.model.Voice;
 import org.healthylifestyle.filesystem.service.ImageService;
 import org.healthylifestyle.filesystem.service.VideoService;
 import org.healthylifestyle.filesystem.service.VoiceService;
+import org.healthylifestyle.notification.service.MessageNotificationService;
 import org.healthylifestyle.user.model.User;
 import org.healthylifestyle.user.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
@@ -45,8 +48,6 @@ public class MessageServiceImpl implements MessageService {
 	@Autowired
 	private VoiceService voiceService;
 	@Autowired
-	private ChatService chatService;
-	@Autowired
 	private ChatUserService chatUserService;
 	@Autowired
 	private UserService userService;
@@ -54,8 +55,12 @@ public class MessageServiceImpl implements MessageService {
 	private Validator validator;
 	@Autowired
 	private MessageSource messageSource;
+	@Autowired
+	private MessageNotificationService messageNotificationService;
 
 	private static final int MESSAGES_LIMIT = 50;
+
+	private static final Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
 
 	@Override
 	public Message findById(Long messageId) {
@@ -64,16 +69,19 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	public Message save(SaveMessageRequest saveRequest, Long chatId) throws ValidationException {
+		logger.debug("Start saving message");
+
 		BindingResult validationResult = BindingResultFactory.getInstance(saveRequest, "saveRequest", validator);
 
 		ErrorParser.checkErrors(validationResult, "Exception occurred while checking saving data. Data is invalid",
 				Type.BAD_REQUEST);
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
-		if (!chatService.isMember(chatId, user.getId())) {
-			ErrorParser.reject("message.save.notMember", validationResult, messageSource);
+		logger.debug("Checking user for membership");
+		if (!chatUserService.isMember(chatId, user.getId())) {
+			validationResult.reject("Вы не можете отправить сообщение в чат, в котором вы не состоите");
 		}
 
 		ErrorParser.checkErrors(validationResult,
@@ -83,10 +91,12 @@ public class MessageServiceImpl implements MessageService {
 		ChatUser chatUser = chatUserService.findByChatAndUser(chatId, user.getId());
 
 		Message message = new Message();
+		message.setUuid(saveRequest.getUuid());
 		message.setValue(saveRequest.getText());
 		message.setChatUser(chatUser);
 		message.setChat(chatUser.getChat());
 
+		logger.debug("Searching media attachments");
 		List<Image> images = imageService.findAllByIdIn(saveRequest.getImageIds());
 		message.addImages(images);
 
@@ -98,6 +108,10 @@ public class MessageServiceImpl implements MessageService {
 
 		message = messageRepository.save(message);
 
+		messageNotificationService.save(message);
+
+		logger.debug("Message has been saved");
+
 		return message;
 	}
 
@@ -106,9 +120,9 @@ public class MessageServiceImpl implements MessageService {
 		BindingResult validationResult = BindingResultFactory.getInstance("message");
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
-		if (!chatService.isMember(chatId, user.getId())) {
+		if (!chatUserService.isMember(chatId, user.getId())) {
 			ErrorParser.reject("message.find.notMember", validationResult, messageSource);
 		}
 
@@ -127,9 +141,9 @@ public class MessageServiceImpl implements MessageService {
 		BindingResult validationResult = BindingResultFactory.getInstance("message");
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
-		if (!chatService.isMember(chatId, user.getId())) {
+		if (!chatUserService.isMember(chatId, user.getId())) {
 			ErrorParser.reject("message.find.notMember", validationResult, messageSource);
 		}
 
@@ -148,7 +162,7 @@ public class MessageServiceImpl implements MessageService {
 		BindingResult validationResult = BindingResultFactory.getInstance("message");
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
 		if (!messageRepository.isOwner(messageId, user.getId())) {
 			ErrorParser.reject("message.delete.notOwner", validationResult, messageSource);
@@ -174,30 +188,35 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	public void update(UpdateMessageRequest updateRequest, Long id) throws ValidationException {
+		logger.debug("Start updating chat");
+
 		BindingResult validationResult = BindingResultFactory.getInstance(updateRequest, "updateRequest", validator);
 		ErrorParser.checkErrors(validationResult,
 				"Exception occurred while updating message with id '%s'. Update request is invalid", Type.BAD_REQUEST);
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
+		logger.debug("Checking is owner");
 		if (!messageRepository.isOwner(id, user.getId())) {
-			ErrorParser.reject("message.update.notOwner", validationResult, messageSource);
+			validationResult.reject("message.notOwner", "Вы не можете отредактировать чужое сообщение");
 		}
 		ErrorParser.checkErrors(validationResult,
 				"Exception occurred while updating message '%s'. The user '%s' is not owner of it", Type.FORBIDDEN, id,
 				user.getId());
 
 		Optional<Message> message = messageRepository.findById(id);
+		logger.debug("Checking message for existence");
 		if (message.isEmpty()) {
 			ErrorParser.reject("message.update.notExist", validationResult, messageSource, id);
 		}
 		ErrorParser.checkErrors(validationResult,
 				"Exception occurred while updating message '%s'. This message doesn't exist", Type.NOT_FOUND, id);
 
-		imageService.deleteByMessage(updateRequest.getDeletedImageIds(), message.get(), user);
-		videoService.deleteByMessage(updateRequest.getDeletedVideoIds(), message.get(), user);
-		voiceService.deleteByMessage(updateRequest.getDeletedVideoIds(), message.get(), user);
+		List<Image> deletedImages = imageService.findByMessage(updateRequest.getDeletedImageIds(), message.get(), user);
+		deletedImages.forEach(i -> imageService.remove(i));
+//		videoService.deleteByMessage(updateRequest.getDeletedVideoIds(), message.get(), user);
+//		voiceService.deleteByMessage(updateRequest.getDeletedVideoIds(), message.get(), user);
 
 		List<Image> images = imageService.findAllByIdIn(updateRequest.getImageIds());
 		message.get().addImages(images);
@@ -208,7 +227,11 @@ public class MessageServiceImpl implements MessageService {
 		List<Voice> voices = voiceService.findAllByIdIn(updateRequest.getVoiceIds());
 		message.get().addVoices(voices);
 
+		message.get().setValue(updateRequest.getText());
+
 		messageRepository.save(message.get());
+
+		logger.debug("The message has been updated {}", message.get().getId());
 	}
 
 	@Override
@@ -216,7 +239,7 @@ public class MessageServiceImpl implements MessageService {
 		BindingResult validationResult = BindingResultFactory.getInstance("message");
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
 		Optional<Message> message = messageRepository.findById(messageId);
 		if (message.isEmpty()) {
@@ -243,9 +266,12 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	public Message answerMessage(SaveMessageRequest saveRequest, Long id) throws ValidationException {
+		logger.debug("Start answering message");
+
 		BindingResult validationResult = BindingResultFactory.getInstance("message");
 
 		Optional<Message> answeredMessage = messageRepository.findById(id);
+		logger.debug("Start checking message for existence");
 		if (answeredMessage.isEmpty()) {
 			ErrorParser.reject("message.answer.notFound", validationResult, messageSource, id);
 		}
@@ -253,10 +279,11 @@ public class MessageServiceImpl implements MessageService {
 				"Exception occurred while answering the message '%s', It doesn't exist", Type.NOT_FOUND, id);
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
 		Chat chat = answeredMessage.get().getChat();
-		if (!chatService.isMember(chat.getId(), user.getId())) {
+		logger.debug("Check user for membership");
+		if (!chatUserService.isMember(chat.getId(), user.getId())) {
 			ErrorParser.reject("message.answer.notMember", validationResult, messageSource, chat.getId());
 		}
 
@@ -270,18 +297,25 @@ public class MessageServiceImpl implements MessageService {
 
 		message = messageRepository.save(message);
 
+		logger.debug("The message {} has been answered {}", answeredMessage.get().getId(), message.getId());
+
 		return message;
 	}
 
 	@Override
 	public List<Message> findFavorites(int page) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
 		List<Message> messages = messageRepository.findFavorites(user.getId(),
 				PageRequest.of(page - 1, MESSAGES_LIMIT));
 
 		return messages;
+	}
+
+	@Override
+	public Message findLastByChat(Long chatId) {
+		return messageRepository.findLastByChat(chatId);
 	}
 
 }

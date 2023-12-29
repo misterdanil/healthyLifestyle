@@ -15,6 +15,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 	@Query("select v from Video v where v.id in (:ids)")
 	List<Video> findAllByIdIn(List<Long> ids);
 
-	@Query("delete from Video v inner join Message m on m.videos = v inner join m.chatUser cu where v.id in (:ids) and m = :message and cu.user = :user")
+	@Query("delete from Video v where v.id in (:ids) and v.id in (select v.id from Video v inner join Message m on element(m.videos).id = v.id where m = :message and m.chatUser.user = :user)")
 	void deleteByMessage(List<Long> ids, Message message, User user);
 }

@@ -1,11 +1,12 @@
 package org.healthyLifestyle.authentication.common.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 
 public class AuthenticationRequest {
-	@Pattern(regexp = "")
+	@Email(message = "Введите корректную почту")
 	private String email;
-	@Pattern(regexp = "^[A-Za-z0-9]{8, }$")
+	@Pattern(regexp = "^[A-Za-z0-9]{8, }$", message = "Пароль некорректный")
 	private String password;
 
 	public String getEmail() {

@@ -42,4 +42,9 @@ public class ChatNotificationServiceImpl implements ChatNotificationService {
 		return chatNotification;
 	}
 
+	@Override
+	public void delete(ChatNotification chatNotification) {
+		chatNotificationRepository.delete(chatNotification);
+	}
+
 }

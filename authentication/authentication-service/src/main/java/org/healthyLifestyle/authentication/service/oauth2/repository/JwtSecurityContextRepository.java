@@ -139,9 +139,11 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 		Cookie valueCookie = new Cookie("access_token", accessToken.getToken());
 		valueCookie.setMaxAge(duration);
 		valueCookie.setHttpOnly(true);
+		valueCookie.setPath("/");
 
 		Cookie expiresAtCookie = new Cookie("at_expires_at", String.valueOf(accessToken.getExpiredAt().getTime()));
 		expiresAtCookie.setMaxAge(duration);
+		expiresAtCookie.setPath("/");
 
 		cookies.add(valueCookie);
 		cookies.add(expiresAtCookie);
@@ -158,9 +160,11 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 		Cookie valueCookie = new Cookie("refresh_token", refreshToken.getToken());
 		valueCookie.setMaxAge(duration);
 		valueCookie.setHttpOnly(true);
+		valueCookie.setPath("/");
 
 		Cookie expiresAtCookie = new Cookie("rt_expires_at", String.valueOf(refreshToken.getExpiredAt().getTime()));
 		expiresAtCookie.setMaxAge(duration);
+		expiresAtCookie.setPath("/");
 
 		cookies.add(valueCookie);
 		cookies.add(expiresAtCookie);

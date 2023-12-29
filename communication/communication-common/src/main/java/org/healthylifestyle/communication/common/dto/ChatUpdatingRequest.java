@@ -5,26 +5,17 @@ import java.util.List;
 import org.healthylifestyle.communication.model.settings.Invitation;
 import org.healthylifestyle.communication.model.settings.Modification;
 import org.healthylifestyle.communication.model.settings.Privacy;
-import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public class ChatUpdatingRequest {
-	@NotNull(message = "{chat.update.id.notnull}")
-	private Long id;
+	@NotBlank(message = "Новое название не может быть пустым")
 	private String title;
 	private Invitation invitation;
 	private Modification modification;
 	private Privacy privacy;
 	private List<Long> adminCandidateIds;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
+	private Long imageId;
 
 	public String getTitle() {
 		return title;
@@ -64,6 +55,14 @@ public class ChatUpdatingRequest {
 
 	public void setAdminCandidateIds(List<Long> adminCandidateIds) {
 		this.adminCandidateIds = adminCandidateIds;
+	}
+
+	public Long getImageId() {
+		return imageId;
+	}
+
+	public void setImageId(Long imageId) {
+		this.imageId = imageId;
 	}
 
 }

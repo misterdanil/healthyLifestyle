@@ -1,5 +1,6 @@
 package org.healthylifestyle.user.model.lifestyle.healthy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.healthylifestyle.user.model.User;
@@ -37,11 +38,22 @@ public class Healthy {
 	}
 
 	public List<Parameter> getParameters() {
+		if (parameters == null) {
+			parameters = new ArrayList<>();
+		}
 		return parameters;
 	}
 
 	public void setParameters(List<Parameter> parameters) {
 		this.parameters = parameters;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 }

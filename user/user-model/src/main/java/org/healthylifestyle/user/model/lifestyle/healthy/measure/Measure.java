@@ -1,6 +1,7 @@
 package org.healthylifestyle.user.model.lifestyle.healthy.measure;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,9 +16,9 @@ public class Measure {
 	@SequenceGenerator(name = "measure_id_generator", sequenceName = "measure_sequence", initialValue = 1, allocationSize = 20)
 	@GeneratedValue(generator = "measure_id_generator", strategy = GenerationType.SEQUENCE)
 	private Long id;
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private Type type;
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private Unit unit;
 
 	public Long getId() {

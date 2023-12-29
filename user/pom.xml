@@ -12,5 +12,6 @@
   	<module>user-repository</module>
   	<module>user-service</module>
   	<module>user-common</module>
+  	<module>user-web</module>
   </modules>
 </project>

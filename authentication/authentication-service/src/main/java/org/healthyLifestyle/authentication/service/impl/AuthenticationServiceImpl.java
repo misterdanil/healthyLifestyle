@@ -1,13 +1,8 @@
 package org.healthyLifestyle.authentication.service.impl;
 
-import org.healthyLifestyle.authentication.common.dto.AccessToken;
 import org.healthyLifestyle.authentication.common.dto.AuthenticationRequest;
-import org.healthyLifestyle.authentication.common.dto.AuthenticationResponse;
 import org.healthyLifestyle.authentication.common.dto.SignUpRequest;
-import org.healthyLifestyle.authentication.common.mapper.RefreshTokenMapper;
-import org.healthyLifestyle.authentication.common.mapper.UserMapper;
 import org.healthyLifestyle.authentication.model.ConfirmCode;
-import org.healthyLifestyle.authentication.model.RefreshToken;
 import org.healthyLifestyle.authentication.service.AuthenticationService;
 import org.healthyLifestyle.authentication.service.ConfirmCodeService;
 import org.healthyLifestyle.authentication.service.RefreshTokenService;
@@ -22,6 +17,8 @@ import org.healthylifestyle.user.model.User;
 import org.healthylifestyle.user.service.UserService;
 import org.healthylifestyle.user.service.error.OAuth2UserExistException;
 import org.healthylifestyle.user.service.util.RoleUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -68,10 +65,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	private SecurityContextRepository securityContextRepository;
 	@Autowired
 	private Validator validator;
+	private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
 	@Override
 	public void login(AuthenticationRequest authenticationRequest, HttpServletRequest request,
 			HttpServletResponse response) throws ValidationException {
+		logger.debug("Start validating login request");
 		BindingResult bindingResult = new BeanPropertyBindingResult(authenticationRequest, "authenticationRequest");
 
 		String email = authenticationRequest.getEmail();
@@ -79,16 +78,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 		User user = userService.findByEmail(email);
 		if (user == null) {
-			bindingResult.rejectValue("email", "email.not_exists", "email not exists");
+			logger.debug("There is no user with email " + email);
+			bindingResult.rejectValue("email", "email.not_exists", "Логин и/или пароль неверны");
 			ErrorParser.checkErrors(bindingResult,
 					"Exception occurred while logging user. The user doesn't exist with email '%s'", Type.NOT_FOUND,
 					email);
 		}
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {
-			bindingResult.rejectValue("password", "password.mismatch", "password is mismatch");
+			logger.debug("Passwords are mismatch");
+			bindingResult.rejectValue("password", "password.mismatch", "Пароль неверный");
 			ErrorParser.checkErrors(bindingResult, "The user doesn't have the same password", Type.NOT_FOUND);
 		}
+
+		logger.debug("Login data is valid. Authorization user...");
 
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user.getId(),
 				user.getPassword(), RoleUtil.getAuthorities(user));
@@ -102,6 +105,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	@Override
 	public void signUp(SignUpRequest signUpRequest, HttpServletRequest request, HttpServletResponse response)
 			throws ValidationException {
+		logger.debug("Start validating sign up request");
 		BindingResult validationResult = BindingResultFactory.getInstance(signUpRequest, "signUpRequest", validator);
 
 		ErrorParser.checkErrors(validationResult, "Exception occurred while signing up user. The data is invalid",
@@ -110,10 +114,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		String email = signUpRequest.getEmail();
 
 		if (userService.findByEmail(email) != null) {
-			validationResult.reject("authentication.signUp.email.exist", "A user with this email is already exists");
+			validationResult.reject("authentication.signUp.email.exist", "Пользователь с такой почтой уже существует");
 		}
 
 		ErrorParser.checkErrors(validationResult, "The user with email '%s' already exists", Type.BAD_REQUEST, email);
+
+		logger.debug("Sign up request is valid");
 
 		signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
@@ -140,7 +146,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		String email = signUpRequest.getEmail();
 
 		if (userService.findByEmail(email) != null) {
-			validationResult.reject("authentication.signUp.email.exist", "A user with this email is already exists");
+			validationResult.reject("authentication.signUp.email.exist", "Пользователь с такой почтой уже существует");
 		}
 
 		ErrorParser.checkErrors(validationResult, "The user with email '%s' already exists", Type.BAD_REQUEST, email);
@@ -192,14 +198,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		User user = userService.findById(Long.valueOf(auth.getName()));
 
 		if (user.isEnabled()) {
-			validationResult.reject("confirm.code.alreadyEnable", "You has already enabled");
+			validationResult.reject("confirm.code.alreadyEnable", "Ваш аккаунт уже верифицирован");
 		}
 
 		ErrorParser.checkErrors(validationResult, "The user has already enabled", Type.CONFILICT);
 
 		ConfirmCode confirmCode = codeService.findByUserId(user.getId());
 		if (!confirmCode.getCode().equals(code)) {
-			validationResult.reject("confirm.code.notEquals", "This code is wrong");
+			validationResult.reject("confirm.code.notEquals", "Код неверен");
 		}
 
 		ErrorParser.checkErrors(validationResult, "These codes are not equals", Type.BAD_REQUEST);

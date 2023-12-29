@@ -29,6 +29,7 @@ public class Message {
 	@SequenceGenerator(name = "message_id_generator", sequenceName = "message_sequence")
 	@GeneratedValue(generator = "message_id_generator", strategy = GenerationType.SEQUENCE)
 	private Long id;
+	private String uuid;
 	@Column(nullable = false)
 	private String value;
 	@ManyToOne
@@ -38,7 +39,7 @@ public class Message {
 	@JoinColumn(name = "chat_id", nullable = false)
 	private Chat chat;
 	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "message_id", nullable = false)
+	@JoinColumn(name = "message_id")
 	private List<Image> images;
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "message_id", nullable = false)
@@ -49,7 +50,7 @@ public class Message {
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<Reaction> reactions;
 	@ManyToOne
-	@JoinColumn(name = "message_id", nullable = false)
+	@JoinColumn(name = "message_id")
 	private Message answeredMessage;
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdOn = new Date();
@@ -60,6 +61,14 @@ public class Message {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 	public String getValue() {

@@ -27,13 +27,13 @@ public class EventNotificationServiceImpl implements EventNotificationService {
 
 		eventNotification = eventNotificationRepository.save(eventNotification);
 
-		EventNotificationDto end = new EventNotificationDto();
-		end.setEventId(event.getId());
-		end.setFirstName(from.getFirstName());
-		end.setLastName(from.getLastName());
-		end.setDescription(event.getDescription());
+		EventNotificationDto dto = new EventNotificationDto();
+		dto.setEventId(event.getId());
+		dto.setFirstName(from.getFirstName());
+		dto.setLastName(from.getLastName());
+		dto.setDescription(event.getDescription());
 
-		messagingTemplate.convertAndSend("attach/notification/" + from.getId(), eventNotification);
+		messagingTemplate.convertAndSend("attach/notification/" + from.getId(), dto);
 
 		return eventNotification;
 	}

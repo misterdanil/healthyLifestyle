@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.annotation.PostConstruct;
 
 @Service
-@PropertySource("classpath: absolute_path.properties")
+@PropertySource("classpath:absolute_path.properties")
 public class VideoServiceImpl implements VideoService {
 	@Autowired
 	private VideoRepository videoRepository;

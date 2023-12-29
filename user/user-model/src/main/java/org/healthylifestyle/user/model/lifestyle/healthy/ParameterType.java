@@ -34,7 +34,7 @@ public class ParameterType {
 	@Column(nullable = false)
 	@Enumerated
 	private ClassType type;
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "measure_id")
 	private Measure measure;
 

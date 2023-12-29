@@ -8,4 +8,6 @@ public interface ChatNotificationService {
 	ChatNotification findByChatIdAndToId(Long chatId, Long toId);
 
 	ChatNotification save(Chat chat, User from, User to);
+	
+	void delete(ChatNotification chatNotification);
 }

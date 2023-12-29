@@ -11,8 +11,10 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public class ChatCreatingRequest {
-	@NotBlank(message = "{title.notBlank}")
+	@NotBlank(message = "Введите название чата")
 	private String title;
+	@NotBlank
+	private String uuid;
 	@NotEmpty(message = "{users.notEmpty}")
 	private List<Long> userIds;
 	@NotNull(message = "{setting.invitation}")
@@ -29,6 +31,14 @@ public class ChatCreatingRequest {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 	public List<Long> getUserIds() {

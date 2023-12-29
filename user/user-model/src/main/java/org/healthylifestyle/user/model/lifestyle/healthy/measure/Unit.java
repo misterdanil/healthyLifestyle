@@ -5,5 +5,8 @@ public enum Unit {
 	CENTIMETER, METER,
 
 	// Weight
-	KG;
+	KG,
+	
+	// Sugar
+	mmol_L // mmol/L
 }

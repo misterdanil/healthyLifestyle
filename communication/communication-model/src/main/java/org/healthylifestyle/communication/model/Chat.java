@@ -37,7 +37,7 @@ public class Chat {
 	private String title;
 	@Column(nullable = false)
 	private String uuid;
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "chat_chatuser", joinColumns = @JoinColumn(name = "chat_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "chatuser_id", nullable = false))
 	private List<ChatUser> users;
 	@OneToMany(cascade = CascadeType.ALL)

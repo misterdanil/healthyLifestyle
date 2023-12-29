@@ -14,5 +14,6 @@
 		<module>filesystem-common</module>
 		<module>filesystem-repository</module>
 		<module>filesystem-service</module>
+		<module>filesystem-web</module>
 	</modules>
 </project>

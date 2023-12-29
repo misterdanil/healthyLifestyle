@@ -8,5 +8,7 @@ public interface ParameterTypeService {
 	ParameterType findById(Long id);
 
 	List<ParameterType> findAll();
+	
+	ParameterType save(ParameterType pt);
 
 }

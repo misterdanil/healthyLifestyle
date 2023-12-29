@@ -17,11 +17,13 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public void save(String name) {
+	public Role save(String name) {
 		Role role = new Role();
 		role.setName(name);
 
-		roleRepository.save(role);
+		role = roleRepository.save(role);
+		
+		return role;
 	}
 
 }

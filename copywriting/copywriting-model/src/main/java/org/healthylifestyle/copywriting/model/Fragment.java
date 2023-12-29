@@ -35,10 +35,10 @@ public class Fragment {
 	@JoinColumn(name = "css_id", nullable = false)
 	private Css css;
 	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "fragment_id", nullable = false)
+	@JoinColumn(name = "fragment_id")
 	private List<Image> images;
 	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "fragment_id", nullable = false)
+	@JoinColumn(name = "fragment_id")
 	private List<Video> videos;
 
 	public Long getId() {

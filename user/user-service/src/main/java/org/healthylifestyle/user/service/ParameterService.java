@@ -10,7 +10,7 @@ import org.healthylifestyle.user.model.lifestyle.healthy.Status;
 public interface ParameterService {
 	Parameter save(ParameterSaveRequest saveRequest) throws ValidationException;
 
-	Parameter findByUserAndParameterTypeAndStatus(Long userId, Long parameterTypeId, Status status);
+	List<Parameter> findByUserAndParameterTypeAndStatus(Long userId, Long parameterTypeId, Status status);
 
 	List<Parameter> findAllByUserAndStatus(Long userId, Status status);
 

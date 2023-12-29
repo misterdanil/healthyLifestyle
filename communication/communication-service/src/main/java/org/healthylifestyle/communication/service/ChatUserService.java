@@ -7,6 +7,7 @@ import org.healthylifestyle.communication.model.Chat;
 import org.healthylifestyle.communication.model.ChatUser;
 import org.healthylifestyle.user.model.Role;
 import org.healthylifestyle.user.model.User;
+import org.springframework.data.jpa.repository.Query;
 
 public interface ChatUserService {
 	ChatUser findByChatAndUser(Long chatId, Long userId);
@@ -27,5 +28,15 @@ public interface ChatUserService {
 
 	List<ChatUser> findAllChatUsersByChatId(Long chatId) throws ValidationException;
 
+	boolean isMember(Chat chat, User user);
+
+	boolean isMember(Long chatId, Long userId);
+
+	boolean isAdmin(Chat chat, User user);
+
+	boolean isOwner(Chat chat, User user);
+
 	void update(ChatUser chatUser);
+	
+	void delete(ChatUser chatUser);
 }

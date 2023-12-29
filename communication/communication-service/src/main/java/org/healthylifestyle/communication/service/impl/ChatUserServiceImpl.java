@@ -16,10 +16,10 @@ import org.healthylifestyle.user.model.User;
 import org.healthylifestyle.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MapBindingResult;
 
@@ -28,6 +28,7 @@ public class ChatUserServiceImpl implements ChatUserService {
 	@Autowired
 	private ChatUserRepository chatUserRepository;
 	@Autowired
+	@Lazy
 	private ChatService chatService;
 	@Autowired
 	private UserService userService;
@@ -56,7 +57,7 @@ public class ChatUserServiceImpl implements ChatUserService {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		User user = userService.findByUsername(auth.getName());
 
-		if (!chatService.isMember(id, user.getId())) {
+		if (!isMember(id, user.getId())) {
 			ErrorParser.reject("chatUser.count.notMember", validationResult, messageSource, id);
 
 			throw new ValidationException(
@@ -105,7 +106,7 @@ public class ChatUserServiceImpl implements ChatUserService {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		User user = userService.findByUsername(auth.getName());
 
-		if (!chatService.isMember(chat, user)) {
+		if (!isMember(chat, user)) {
 			ErrorParser.reject("chat.findUsers.notMember", validationResult, messageSource);
 
 			throw new ValidationException(
@@ -119,8 +120,33 @@ public class ChatUserServiceImpl implements ChatUserService {
 	}
 
 	@Override
+	public boolean isMember(Chat chat, User user) {
+		return chatUserRepository.isMember(chat, user);
+	}
+
+	@Override
+	public boolean isMember(Long chatId, Long userId) {
+		return chatUserRepository.isMember(chatId, userId);
+	}
+
+	@Override
+	public boolean isAdmin(Chat chat, User user) {
+		return chatUserRepository.isAdmin(chat, user);
+	}
+
+	@Override
+	public boolean isOwner(Chat chat, User user) {
+		return chatUserRepository.isOwner(chat, user);
+	}
+
+	@Override
 	public void update(ChatUser chatUser) {
 		chatUserRepository.save(chatUser);
+	}
+
+	@Override
+	public void delete(ChatUser chatUser) {
+		chatUserRepository.delete(chatUser);
 	}
 
 }

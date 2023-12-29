@@ -5,11 +5,20 @@ import java.util.List;
 import jakarta.validation.constraints.NotBlank;
 
 public class SaveMessageRequest {
-	@NotBlank(message = "{message.save.text.notblank}")
+	private String uuid;
+	@NotBlank(message = "Введите сообщение")
 	private String text;
 	private List<Long> imageIds;
 	private List<Long> videoIds;
 	private List<Long> voiceIds;
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 
 	public String getText() {
 		return text;

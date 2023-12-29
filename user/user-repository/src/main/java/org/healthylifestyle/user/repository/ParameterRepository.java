@@ -15,5 +15,9 @@ public interface ParameterRepository extends CrudRepository<Parameter, Long> {
 	List<Parameter> findByParameterTypeAndStatus(Long parameterTypeId, Status status);
 
 	@Query("select p from Parameter p where p.parameterType.id = :parameterTypeId and p.healthy.user.id = :userId and p.status = :status")
-	Parameter findByUserAndParameterTypeAndStatus(Long userId, Long parameterTypeId, Status status);
+	List<Parameter> findByUserAndParameterTypeAndStatus(Long userId, Long parameterTypeId, Status status);
+
+	@Query("select p from Parameter p where p.parameterType.id = :parameterTypeId and p.healthy.user.id = :userId and p.status = 'ACTUAL'")
+	Parameter findActualByUserAndParameterType(Long userId, Long parameterTypeId);
+
 }

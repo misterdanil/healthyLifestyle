@@ -4,13 +4,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneOffset;
+import java.util.Date;
 
 import org.healthyLifestyle.authentication.common.validation.annotation.Age;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class AgeValidator implements ConstraintValidator<org.healthyLifestyle.authentication.common.validation.annotation.Age, Instant> {
+public class AgeValidator implements ConstraintValidator<org.healthyLifestyle.authentication.common.validation.annotation.Age, Date> {
 	private Integer age;
 
 	@Override
@@ -19,8 +20,8 @@ public class AgeValidator implements ConstraintValidator<org.healthyLifestyle.au
 	}
 
 	@Override
-	public boolean isValid(Instant value, ConstraintValidatorContext context) {
-		LocalDate birthDate = LocalDate.ofInstant(value, ZoneOffset.UTC);
+	public boolean isValid(Date value, ConstraintValidatorContext context) {
+		LocalDate birthDate = LocalDate.ofInstant(value.toInstant(), ZoneOffset.UTC);
 		LocalDate now = LocalDate.now();
 
 		return Period.between(birthDate, now).getYears() >= age;

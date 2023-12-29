@@ -28,7 +28,7 @@ public class MarkServiceImpl implements MarkService {
 	@Override
 	public Mark save(Long articleId, Type type) throws ValidationException {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
 		Article article = articleService.findById(articleId);
 

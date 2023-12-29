@@ -23,16 +23,9 @@ public class MessageNotificationServiceImpl implements MessageNotificationServic
 	private UserService userService;
 
 	@Override
-	public MessageNotification save(Message message, User to) {
+	public void save(Message message) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
-
-		MessageNotification messageNotification = new MessageNotification();
-		messageNotification.setMessage(message);
-		messageNotification.setFrom(user);
-		messageNotification.setTo(to);
-
-		messageNotification = messageNotificationRepository.save(messageNotification);
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
 		MessageNotificationDto mnd = new MessageNotificationDto();
 		mnd.setChatId(message.getChat().getId());
@@ -40,9 +33,20 @@ public class MessageNotificationServiceImpl implements MessageNotificationServic
 		mnd.setLastName(user.getLastName());
 		mnd.setMessage(message.getValue());
 
-		messagingTemplate.convertAndSend("/attach/notification/" + to.getId(), mnd);
+		message.getChat().getUsers().forEach(u -> {
+			if (!u.getUser().getId().equals(user.getId())) {
+				MessageNotification messageNotification = new MessageNotification();
+				messageNotification.setMessage(message);
+				messageNotification.setFrom(user);
+				messageNotification.setTo(u.getUser());
 
-		return messageNotification;
+				messageNotification = messageNotificationRepository.save(messageNotification);
+
+				messagingTemplate.convertAndSend("/attach/notification/" + u.getUser().getId(), mnd);
+			}
+		});
+
+		messagingTemplate.convertAndSend("/chatss/" + message.getChat().getId(), mnd);
 	}
 
 }

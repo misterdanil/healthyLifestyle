@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 import org.healthyLifestyle.authentication.common.validation.AgeValidator;
 
 import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 
 @Target(value = ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -16,4 +17,10 @@ import jakarta.validation.Constraint;
 @Documented
 public @interface Age {
 	int value() default 18;
+	
+	String message() default "Age must be 18 or bigger";
+
+	Class<?>[] groups() default {};
+    
+	Class<? extends Payload>[] payload() default {};
 }

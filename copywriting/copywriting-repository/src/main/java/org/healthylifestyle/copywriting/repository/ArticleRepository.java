@@ -11,6 +11,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 	@Query("select a from Article a inner join a.user u where u.id = :userId")
 	List<Article> findAllByUser(Long userId, Pageable pageable);
 
-	@Query("select a from Article a where a.title like concat(:title, '%')")
+	@Query("select a from Article a where a.originalTitle like concat(:title, '%')")
 	List<Article> findAllByTitle(String title, Pageable pageable);
+
+	@Query("select a from Article a where a.category.id = :id")
+	List<Article> findAllByCategory(Long id, Pageable pageable);
 }

@@ -1,5 +1,6 @@
 package org.healthylifestyle.app.config;
 
+import org.healthyLifestyle.authentication.service.filter.JwtAuthenticationFilter;
 import org.healthyLifestyle.authentication.service.filter.RefreshTokenFilter;
 import org.healthyLifestyle.authentication.service.oauth2.repository.JwtSecurityContextRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 
 @Configuration
@@ -29,8 +31,10 @@ public class SecurityConfig {
 		http.oauth2Login(e -> e.tokenEndpoint(o -> o.accessTokenResponseClient(authorizationCodeTokenResponseClient))
 				.userInfoEndpoint(t -> t.userService(oauth2UserService)))
 				.securityContext(sc -> sc.securityContextRepository(contextRepository))
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/login", "/signup").permitAll()
-						.requestMatchers("/user/*/confirm/*").authenticated())
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/login/*", "/signup", "/login", "/chatsocket/**", "/chatss/*", "/testsocket")
+						.permitAll().requestMatchers("/user/*/confirm/*", "/chat/**", "/messages/*").authenticated()
+						.requestMatchers("/article/**").hasRole("COPYWRITER").anyRequest().authenticated())
 				.csrf(csrf -> csrf.disable()).addFilterAfter(refreshTokenFilter, SecurityContextHolderFilter.class);
 		return http.build();
 	}

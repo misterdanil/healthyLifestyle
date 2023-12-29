@@ -10,19 +10,19 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class SignUpRequest {
-	@Pattern(regexp = "\\p{Lu}\\p{L}+")
+	@Pattern(regexp = "\\p{Lu}\\p{L}+", message = "Имя некорректно")
 	@Size(max = 128)
 	private String firstName;
-	@Pattern(regexp = "\\p{Lu}\\p{L}+")
+	@Pattern(regexp = "\\p{Lu}\\p{L}+", message = "Фамилия некорректна")
 	@Size(max = 128)
 	private String lastName;
-	@NotBlank
+	@NotBlank(message = "Укажите ваш псевдоним")
 	private String username;
-	@Email
+	@Email(message = "Введите корректную электронную почту")
 	private String email;
-	@Size(min = 8)
+	@Size(min = 8, message = "Пароль слишком короткий")
 	private String password;
-	@Age
+	@Age(message = "Вам должно быть 18 или больше")
 	private Date birthDate;
 
 	public String getFirstName() {

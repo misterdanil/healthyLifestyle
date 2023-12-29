@@ -13,14 +13,10 @@ import org.healthylifestyle.user.service.RoleService;
 import org.healthylifestyle.user.service.UserService;
 import org.healthylifestyle.user.service.error.OAuth2UserExistException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-
-import jakarta.annotation.PostConstruct;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -64,15 +60,16 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User save(SignUpRequest signUpRequest, String resourceId, String resourceName)
 			throws OAuth2UserExistException {
-		if (existsByResourceIdAndResourceName(resourceId, resourceName)) {
-			throw new OAuth2UserExistException(String.format(
-					"User with resource id '%s' and resource name '%s' is already exists", resourceId, resourceName));
+		User user = userRepository.findByResourceIdAndResourceName(resourceId, resourceName);
+		
+		if (user != null) {
+			return user;
 		}
 
 		Role userRole = roleService.findByName("ROLE_USER");
 		Role oauth2UserRole = roleService.findByName("ROLE_OAUTH2_USER");
 
-		User user = createUser(signUpRequest, Arrays.asList(userRole, oauth2UserRole));
+		user = createUser(signUpRequest, Arrays.asList(userRole, oauth2UserRole));
 		user.setResourceId(resourceId);
 		user.setResourceName(resourceName);
 		

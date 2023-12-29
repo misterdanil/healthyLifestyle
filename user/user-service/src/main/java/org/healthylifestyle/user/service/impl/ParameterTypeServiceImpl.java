@@ -27,4 +27,9 @@ public class ParameterTypeServiceImpl implements ParameterTypeService {
 		return parameterTypes;
 	}
 
+	@Override
+	public ParameterType save(ParameterType pt) {
+		return parameterTypeRepository.save(pt);
+	}
+
 }

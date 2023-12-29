@@ -8,34 +8,48 @@ import org.healthylifestyle.user.model.Role;
 import org.healthylifestyle.user.model.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ChatUserRepository extends CrudRepository<ChatUser, Long> {
 
-	@Query("select * from ChatUser cu where cu.chat_id = :chatId and cu.user_id = :user_id")
+	@Query("select cu from ChatUser cu where cu.chat.id = :chatId and cu.user.id = :userId")
 	ChatUser findByChatAndUser(Long chatId, Long userId);
 
-	@Query("select * from Role r " + "inner join chatuser_roles cur on r.id = cur.role_id "
-			+ "inner join chat_user cu on cu.id = cur.chatuser_id "
-			+ "where cu.user_id = :userId and cu.chat_id = :chatId")
+	@Query("select r from Role r " + "inner join ChatUser cu on r.id = element(cu.roles).id "
+			+ "where cu.user.id = :userId and cu.chat.id = :chatId")
 	List<Role> findRolesByChatIdAndUserId(Long chatId, Long userId);
 
-	@Query("select count(cu) from chatUser cu where cu.chat_id = :chatId and cu.id in :ids")
+	@Query("select count(cu) from ChatUser cu where cu.chat.id = :chatId and cu.user.id in (:ids)")
 	int countChatUsersByIdIn(Long chatId, List<Long> ids);
 
-	@Query("select count(cu) from ChatUser cu where cu.chat_id = :chatId")
+	@Query("select count(cu) from ChatUser cu where cu.chat.id = :chatId")
 	int count(Long chatId);
 
-	@Query("select case when count(cu) > 0 then true else false end from ChatUser cu where cu.chat_id = :chatId and cu.user_id = :userId")
+	@Query("select case when count(cu) > 0 then true else false end from ChatUser cu where cu.chat.id = :chatId and cu.user.id = :userId")
 	boolean existsMember(Long chatId, Long userId);
 
-	@Query("select cu from chatUser cu where cu.id in :ids")
+	@Query("select cu from ChatUser cu where cu.user.id in (:ids)")
 	List<ChatUser> findAllByIds(List<Long> ids);
 
 	List<ChatUser> findByChat(Chat chat);
 
 	void deleteByUserAndChat(User user, Chat chat);
+	
+	@Query("select case when count(cu) > 0 then true else false end from ChatUser cu "
+			+ "where cu.chat = :chat and cu.user = :user")
+	boolean isMember(Chat chat, User user);
+
+	@Query("select case when count(cu) > 0 then true else false end from ChatUser cu "
+			+ "where cu.chat.id = :chatId and cu.user.id = :userId")
+	boolean isMember(Long chatId, Long userId);
+
+	@Query("select case when count(cu) > 0 then true else false end from ChatUser cu inner join cu.roles r "
+			+ "where cu.chat = :chat and cu.user = :user and r.name = 'ROLE_CHAT_ADMIN'")
+	boolean isAdmin(Chat chat, User user);
+
+	@Query("select case when count(cu) > 0 then true else false end from ChatUser cu inner join cu.roles r "
+			+ "where cu.chat = :chat and cu.user = :user and r.name = 'ROLE_CHAT_OWNER'")
+	boolean isOwner(Chat chat, User user);
 
 }

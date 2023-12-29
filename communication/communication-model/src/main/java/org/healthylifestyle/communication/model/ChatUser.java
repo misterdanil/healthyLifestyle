@@ -8,6 +8,7 @@ import org.healthylifestyle.user.model.User;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,7 +28,7 @@ public class ChatUser {
 	@SequenceGenerator(name = "chatuser_id_generator", sequenceName = "chatuser_sequence", initialValue = 1, allocationSize = 20)
 	@GeneratedValue(generator = "chatuser_id_generator", strategy = GenerationType.SEQUENCE)
 	private Long id;
-	@OneToOne
+	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 	@ManyToOne

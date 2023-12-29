@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import jakarta.servlet.FilterChain;
@@ -20,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends GenericFilterBean {
 	@Autowired
 	private SecurityContextRepository securityContextRepository;
+	private RequestAttributeSecurityContextRepository cont = new RequestAttributeSecurityContextRepository();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -31,6 +34,10 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 				.loadContext(new HttpRequestResponseHolder(httpServletRequest, httpServletResponse));
 
 		SecurityContextHolder.setContext(securityContext);
+
+		cont.saveContext(securityContext, httpServletRequest, httpServletResponse);
+
+		chain.doFilter(httpServletRequest, httpServletResponse);
 	}
 
 }

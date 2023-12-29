@@ -37,8 +37,7 @@ public class Category {
 	private Category parentCategory;
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "parentCategory")
 	private List<Category> subCategory;
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "category_id", nullable = false)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
 	private List<Article> articles;
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdOn;

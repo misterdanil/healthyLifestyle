@@ -10,6 +10,8 @@ public class SaveArticleRequest {
 	private String uuid;
 	@NotNull
 	private String title;
+	@NotNull(message = "Укажите категорию для статьи")
+	private Long categoryId;
 	@NotEmpty
 	private List<SaveFragmentRequest> fragmentRequests;
 	@NotNull
@@ -29,6 +31,14 @@ public class SaveArticleRequest {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	public List<SaveFragmentRequest> getFragmentRequests() {

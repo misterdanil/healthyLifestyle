@@ -14,5 +14,6 @@
 		<module>event-service</module>
 		<module>event-repository</module>
 		<module>event-common</module>
+		<module>event-web</module>
 	</modules>
 </project>

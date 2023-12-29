@@ -14,5 +14,6 @@
 		<module>copywriting-service</module>
 		<module>copywriting-common</module>
 		<module>copywriting-repository</module>
+		<module>copywriting-web</module>
 	</modules>
 </project>

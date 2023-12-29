@@ -36,6 +36,8 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null && auth.isAuthenticated()) {
+			filterChain.doFilter(request, response);
+
 			return;
 		}
 
@@ -44,6 +46,8 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
 		if (token != null) {
 			User user = refreshTokenProvider.decryptToken(token);
 			if (user == null) {
+				filterChain.doFilter(request, response);
+
 				return;
 			}
 
@@ -52,6 +56,8 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
 			SecurityContext securityContext = new SecurityContextImpl(authentication);
 
 			contextRepository.saveContext(securityContext, request, response);
+
+			SecurityContextHolder.setContext(securityContext);
 		}
 
 		filterChain.doFilter(request, response);

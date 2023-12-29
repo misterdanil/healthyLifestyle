@@ -1,5 +1,6 @@
 package org.healthylifestyle.copywriting.model;
 
+import java.util.Date;
 import java.util.List;
 
 import org.healthylifestyle.common.Translation;
@@ -14,10 +15,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @Table
@@ -30,6 +34,8 @@ public class Article {
 	private String uuid;
 	@Column(nullable = false, name = "original_title")
 	private String originalTitle;
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "article_id")
 	private List<Translation> translations;
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "image_id")
@@ -39,9 +45,15 @@ public class Article {
 	private List<Fragment> fragments;
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<Mark> marks;
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
+	@ManyToOne
+	@JoinColumn(name = "category_id", nullable = false)
+	private Category category;
+	@Column(nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date createdOn = new Date();
 
 	public Long getId() {
 		return id;
@@ -99,12 +111,28 @@ public class Article {
 		this.image = image;
 	}
 
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+
 	public User getUser() {
 		return user;
 	}
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
 	}
 
 }

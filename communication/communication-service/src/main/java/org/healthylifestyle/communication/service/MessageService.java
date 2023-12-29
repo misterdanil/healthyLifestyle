@@ -26,4 +26,6 @@ public interface MessageService {
 
 	List<Message> findFavorites(int page);
 
+	Message findLastByChat(Long chatId);
+
 }

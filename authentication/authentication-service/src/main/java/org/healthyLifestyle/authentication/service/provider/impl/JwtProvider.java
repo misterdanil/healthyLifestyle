@@ -16,7 +16,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 @Component
-@Scope("prototype")
 public abstract class JwtProvider<T> implements TokenProvider<T> {
 	private Long expirationTimeMillis;
 	private String secretKey;

@@ -1,13 +1,14 @@
 package org.healthylifestyle.communication.service.impl;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.healthylifestyle.common.dto.ErrorResult;
+import org.healthylifestyle.common.error.BindingResultFactory;
 import org.healthylifestyle.common.error.Type;
 import org.healthylifestyle.common.error.ValidationException;
 import org.healthylifestyle.common.web.ErrorParser;
@@ -31,16 +32,18 @@ import org.healthylifestyle.event.model.Event;
 import org.healthylifestyle.event.service.EventService;
 import org.healthylifestyle.filesystem.model.Image;
 import org.healthylifestyle.filesystem.service.ImageService;
-import org.healthylifestyle.filesystem.service.dto.ImageSavingRequest;
 import org.healthylifestyle.notification.model.ChatNotification;
 import org.healthylifestyle.notification.service.ChatNotificationService;
 import org.healthylifestyle.user.model.Role;
 import org.healthylifestyle.user.model.User;
 import org.healthylifestyle.user.repository.RoleRepository;
 import org.healthylifestyle.user.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -48,7 +51,8 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.Validator;
-import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class ChatServiceImpl implements ChatService {
@@ -71,16 +75,21 @@ public class ChatServiceImpl implements ChatService {
 	@Autowired
 	private EventService eventService;
 
+	private static final int MAX = 50;
+
+	private static final Logger logger = LoggerFactory.getLogger(ChatServiceImpl.class);
+
 	@Override
 	public Chat findById(Long id) throws ValidationException {
+		logger.debug("Start validating request to get a chat");
 		BindingResult validationResult = new MapBindingResult(new LinkedHashMap<>(), "chat");
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 		Chat chat = chatRepository.findById(id).get();
 
-		if (!isMember(chat, user)) {
+		if (!chatUserService.isMember(chat, user)) {
 			reject("chat.find.notMember", validationResult, id);
 
 			throw new ValidationException(
@@ -88,11 +97,15 @@ public class ChatServiceImpl implements ChatService {
 					validationResult, user.getId(), chat.getId());
 		}
 
+		logger.debug("The request is valid");
+
 		return chat;
 	}
 
 	@Override
-	public Chat save(ChatCreatingRequest savingRequest, MultipartFile image) throws ValidationException {
+	public Chat save(ChatCreatingRequest savingRequest) throws ValidationException {
+		logger.debug("Start validating chat");
+
 		BindingResult validationResult = new BeanPropertyBindingResult(savingRequest, "chatCreatingRequest");
 		validator.validate(savingRequest, validationResult);
 
@@ -102,28 +115,32 @@ public class ChatServiceImpl implements ChatService {
 
 			if (countUsers < userIds.size()) {
 				validationResult.rejectValue("userIds", "userIds.notContains",
-						messageSource.getMessage("users.notContains", null, LocaleContextHolder.getLocale()));
+						"User id list has users who doesnt exist");
 			}
 		}
 
-		if (validationResult.hasErrors()) {
-			ErrorResult parsedResult = ErrorParser.getErrorResult(validationResult);
+		ErrorParser.checkErrors(validationResult, "Exception occurred while saving chat. It's not valid",
+				Type.BAD_REQUEST);
 
-			throw new ValidationException("Exception occurred while saving chat. It's not valid", parsedResult);
-		}
+		logger.debug("The chat request is valid");
 
 		Role ownerRole = roleRepository.findByName("ROLE_CHAT_OWNER");
 		Role adminRole = roleRepository.findByName("ROLE_CHAT_ADMIN");
 		Role memberRole = roleRepository.findByName("ROLE_CHAT_MEMBER");
 
-		User admin = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-		ChatUser chatAdmin = new ChatUser();
-		chatAdmin.setUser(admin);
-		chatAdmin.addRoles(Arrays.asList(ownerRole, adminRole, memberRole));
+		User admin = userService
+				.findById(Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName()));
 
 		Chat chat = new Chat();
 		chat.setTitle(savingRequest.getTitle());
 		chat.setUuid(UUID.randomUUID().toString());
+
+		ChatUser chatAdmin = new ChatUser();
+		chatAdmin.setUser(admin);
+		chatAdmin.addRoles(Arrays.asList(ownerRole, adminRole, memberRole));
+		chatAdmin.setChat(chat);
+
+		chat.addUser(chatAdmin);
 
 		List<User> users = userService.findAllByIds(userIds);
 		users.forEach(user -> {
@@ -142,13 +159,12 @@ public class ChatServiceImpl implements ChatService {
 
 		chat.setSetting(setting);
 
-		String path = MessageFormat.format("/chats/{0}", chat.getUuid());
-		ImageSavingRequest imageSavingRequest = new ImageSavingRequest();
-		imageSavingRequest.setFile(image);
-		Image avatar = imageService.saveChatImage(imageSavingRequest, path);
+		Image avatar = imageService.findById(savingRequest.getImageId());
 		chat.setImage(avatar);
 
 		Chat savedChat = chatRepository.save(chat);
+
+		logger.debug("Chat has been saved");
 
 		return savedChat;
 	}
@@ -161,28 +177,31 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public Chat update(ChatUpdatingRequest updatingRequest, MultipartFile multipartFile) throws ValidationException {
+	public Chat update(ChatUpdatingRequest updatingRequest, Long id) throws ValidationException {
+		logger.debug("Start updating and validating update chat request");
+
 		BindingResult validationResult = new BeanPropertyBindingResult(updatingRequest, "chatUpdatingRequest");
 		validator.validate(updatingRequest, validationResult);
 
 		String exceptionMessage = "Exception occurred while updating chat";
 
-		if (validationResult.hasErrors()) {
-			throw new ValidationException(exceptionMessage + ". The request is not valid", validationResult);
-		}
+		ErrorParser.checkErrors(validationResult, exceptionMessage + ". The request is not valid", Type.BAD_REQUEST);
 
-		Chat chat = chatRepository.findById(updatingRequest.getId()).get();
+		Chat chat = chatRepository.findById(id).orElse(null);
 		if (chat == null) {
 			String code = "chat.update.id.notExist";
 			validationResult.rejectValue("id", code,
 					messageSource.getMessage(code, null, LocaleContextHolder.getLocale()));
-
-			throw new ValidationException(exceptionMessage + ". Chat doesn't exist", validationResult);
 		}
 
-		User user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+		ErrorParser.checkErrors(validationResult, exceptionMessage + ". Chat doesn't exist", Type.BAD_REQUEST);
+
+		User user = userService
+				.findById(Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName()));
 
 		List<Role> roles = chatUserService.findRolesByChatIdAndUserId(chat.getId(), user.getId());
+
+		logger.debug("Start checking roles");
 
 		List<Long> candidateIds = updatingRequest.getAdminCandidateIds();
 		if (candidateIds != null && !candidateIds.isEmpty()) {
@@ -206,16 +225,12 @@ public class ChatServiceImpl implements ChatService {
 		boolean isAdmin = hasRole(roles, "ROLE_CHAT_ADMIN");
 
 		if (chat.getSetting().getModification().equals(Modification.EVERYONE) || isAdmin) {
-			if (multipartFile != null) {
+			if (updatingRequest.getImageId() != null) {
 				imageService.remove(chat.getImage());
 
-				String path = MessageFormat.format("/chats/{0}", chat.getUuid());
-				ImageSavingRequest imageSavingRequest = new ImageSavingRequest();
-				imageSavingRequest.setFile(multipartFile);
-				Image avatar = imageService.saveChatImage(imageSavingRequest, path);
+				Image avatar = imageService.findById(updatingRequest.getImageId());
 
 				chat.setImage(avatar);
-				imageService.saveChatImage(imageSavingRequest, path);
 			}
 
 			if (updatingRequest.getTitle() != null && !updatingRequest.getTitle().isEmpty()) {
@@ -245,6 +260,8 @@ public class ChatServiceImpl implements ChatService {
 
 		chat = chatRepository.save(chat);
 
+		logger.debug("Chat has been updated");
+
 		return chat;
 	}
 
@@ -260,6 +277,8 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public void joinChat(JoiningChatRequest joiningRequest) throws ValidationException {
+		logger.debug("Start joining chat by id " + joiningRequest.getChatId());
+
 		BindingResult validationResult = new BeanPropertyBindingResult(joiningRequest, "joininChatRequest");
 
 		Long id = joiningRequest.getChatId();
@@ -269,22 +288,20 @@ public class ChatServiceImpl implements ChatService {
 			rejectValue("chatId", "chat.join.id.notExist", validationResult, id);
 		}
 
-		if (validationResult.hasErrors()) {
-			throw new ValidationException("Exception occurred while joining chat. Couldn't get chat by id " + id,
-					validationResult);
-		}
+		ErrorParser.checkErrors(validationResult,
+				"Exception occurred while joining chat. Couldn't get chat by id " + id, Type.NOT_FOUND);
 
 		Chat chat = chatOpt.get();
 
-		User user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+		User user = userService
+				.findById(Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName()));
 
 		Privacy privacy = chat.getSetting().getPrivacy();
 
 		if (privacy.equals(Privacy.CLOSED)) {
 			reject("chat.join.closed", validationResult);
-
-			throw new ValidationException("Exception occurred while saving chat. Chat with id '%s' is closed",
-					validationResult, chat.getId());
+			ErrorParser.checkErrors(validationResult,
+					"Exception occurred while saving chat. Chat with id '%s' is closed", Type.NOT_FOUND, chat.getId());
 		} else if (privacy.equals(Privacy.INVITATION)) {
 			joinByInvitation(chat, user, validationResult);
 		} else if (privacy.equals(Privacy.OPENED)) {
@@ -292,15 +309,23 @@ public class ChatServiceImpl implements ChatService {
 		}
 
 		chatRepository.save(chat);
+
+		logger.debug("The user has been added");
 	}
 
 	private void joinByInvitation(Chat chat, User user, BindingResult validationResult) throws ValidationException {
+		logger.debug("Start joining chat with id " + chat.getId() + " by invitation");
+
 		ChatNotification invitation = chatNotificationService.findByChatIdAndToId(chat.getId(), user.getId());
 
 		if (invitation == null) {
 			reject("chat.join.invitation.notExist", validationResult);
 		} else {
 			checkUserExistenceAndAdd(chat, user, validationResult, "chat.join.user.exist", user.getId());
+
+			logger.debug("The user has been added");
+
+			chatNotificationService.delete(invitation);
 		}
 	}
 
@@ -308,8 +333,10 @@ public class ChatServiceImpl implements ChatService {
 			Object... args) throws ValidationException {
 		if (!chatUserService.existsMember(chat.getId(), user.getId())) {
 			ChatUser newMember = new ChatUser();
+			Role role = roleRepository.findByName("ROLE_CHAT_MEMBER");
 			newMember.setChat(chat);
 			newMember.setUser(user);
+			newMember.addRole(role);
 
 			chat.addUser(newMember);
 		} else {
@@ -321,29 +348,53 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	private void rejectValue(String value, String code, BindingResult validationResult, Object... args) {
-		validationResult.rejectValue(value, code,
-				messageSource.getMessage(code, args, LocaleContextHolder.getLocale()));
+		validationResult.rejectValue(value, code, messageSource.getMessage(code, args, Locale.ENGLISH));
 	}
 
 	private void reject(String code, BindingResult validationResult, Object... args) {
-		validationResult.reject(code, messageSource.getMessage(code, args, LocaleContextHolder.getLocale()));
+		validationResult.reject(code, messageSource.getMessage(code, args, Locale.ENGLISH));
 	}
 
 	@Override
 	public void inviteUser(Long chatId, Long userId) throws ValidationException {
-		User user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+		BindingResult validationResult = BindingResultFactory.getInstance("inviteUser");
+
+		logger.debug("Start inviting user");
+
+		User user = userService
+				.findById(Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName()));
 
 		Chat chat = chatRepository.findById(chatId).orElse(null);
 		if (chat == null) {
-			throw new ValidationException(null, null, Type.NOT_FOUND);
+			validationResult.reject("chat.invite.chat.notExist", "Couldn't get chat by id " + chatId);
 		}
 
 		User to = userService.findById(userId);
 		if (to == null) {
-			throw new ValidationException(null, null, Type.NOT_FOUND);
+			validationResult.reject("chat.invite.to.notExist", "Couldn't get user by id " + userId);
 		}
 
-		chatNotificationService.save(chat, user, to);
+		ErrorParser.checkErrors(validationResult, "Exception occurred while inviting user. The input data is invalid",
+				Type.NOT_FOUND);
+
+		if (user.getId().equals(to.getId())) {
+			validationResult.reject("chat.invite.from.equals", "You can't send invitation to yourself");
+		}
+
+		ErrorParser.checkErrors(validationResult,
+				"Exception occurred while inviting user. From and to parameters are the same", Type.BAD_REQUEST);
+
+		Invitation invitationRule = chat.getSetting().getInvitation();
+		if (invitationRule.equals(Invitation.ADMIN) && chatUserService.isAdmin(chat, user)) {
+			chatNotificationService.save(chat, user, to);
+		} else if (invitationRule.equals(Invitation.EVERYONE)) {
+			chatNotificationService.save(chat, user, to);
+		} else {
+			validationResult.reject("chat.invite.from.notAdmin",
+					"Вы не администратор данного чата");
+		}
+		ErrorParser.checkErrors(validationResult, "Exception occurred while inviting user. The user isn't an admin",
+				Type.FORBIDDEN);
 	}
 
 	@Override
@@ -352,7 +403,7 @@ public class ChatServiceImpl implements ChatService {
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-		User admin = userService.findByUsername(auth.getName());
+		User admin = userService.findById(Long.valueOf(auth.getName()));
 
 		Long chatId = addingRequest.getChatId();
 		Long userId = addingRequest.getUserId();
@@ -362,7 +413,7 @@ public class ChatServiceImpl implements ChatService {
 			rejectValue("id", "chat.add.chatId.notExist", validationResult, chatId);
 		}
 
-		if (!isAdmin(chat, admin)) {
+		if (!chatUserService.isAdmin(chat, admin)) {
 			reject("chat.add.notAdmin", validationResult);
 
 			throw new ValidationException("Exception occurred while adding user. You don't have this right",
@@ -386,33 +437,40 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public void joinByInvitation(JoiningChatRequest joiningRequest) throws ValidationException {
+		logger.debug("Start joining by invitation");
+
 		BindingResult validationResult = new BeanPropertyBindingResult(joiningRequest, "joininChatRequest");
 
 		Long id = joiningRequest.getChatId();
 
 		Optional<Chat> chatOpt = chatRepository.findById(id);
 		if (!chatOpt.isPresent()) {
-			rejectValue("chatId", "chat.join.id.notExist", validationResult, id);
+			validationResult.rejectValue("chatId", "chat.joinByInvitation.chatId.notExist",
+					"There is no chat by this id");
 		}
 
-		if (validationResult.hasErrors()) {
-			throw new ValidationException(
-					"Exception occurred while joining chat by invitation. Couldn't get chat by id " + id,
-					validationResult);
-		}
+		ErrorParser.checkErrors(validationResult,
+				"Exception occurred while joining chat by invitation. Couldn't get chat by id " + id, Type.BAD_REQUEST);
+
+		logger.debug("The request is valid");
 
 		Chat chat = chatOpt.get();
 
-		User user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+		User user = userService
+				.findById(Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName()));
 
 		joinByInvitation(chat, user, validationResult);
 	}
 
 	@Override
+	@Transactional
 	public void leave(LeavingChatRequest leavingRequest) throws ValidationException {
+		logger.debug("Start leaving chat and validating request");
+
 		BindingResult validationResult = getBindingResult(leavingRequest, "leavingChatRequest");
 
-		checkErrors(validationResult, "Exception occurred while leaving chat. Id must be not null", Type.BAD_REQUEST);
+		ErrorParser.checkErrors(validationResult, "Exception occurred while leaving chat. Id must be not null",
+				Type.BAD_REQUEST);
 
 		Long chatId = leavingRequest.getChatId();
 
@@ -421,15 +479,16 @@ public class ChatServiceImpl implements ChatService {
 		if (chat == null) {
 			rejectValue("chatId", "chat.leave.chatId.notExist", validationResult, chatId);
 
-			throw new ValidationException("Exception occurred while leaving chat. There is no chat with this id '%s'",
-					validationResult, Type.BAD_REQUEST, chatId);
+			ErrorParser.checkErrors(validationResult,
+					"Exception occurred while leaving chat. There is no chat with this id '%s'", Type.NOT_FOUND,
+					chatId);
 		}
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
-		if (!isMember(chat, user)) {
+		if (!chatUserService.isMember(chat, user)) {
 			reject("chat.leave.notMember", validationResult);
 
 			throw new ValidationException(
@@ -437,13 +496,20 @@ public class ChatServiceImpl implements ChatService {
 					validationResult, Type.FORBIDDEN, user.getId(), chatId);
 		}
 
-		if (isOwner(chat, user)) {
+		logger.debug("The user is a member");
+
+		if (chatUserService.isOwner(chat, user)) {
 			RemovingChatRequest removingRequest = new RemovingChatRequest();
 			removingRequest.setChatId(chatId);
 
 			remove(removingRequest);
 		} else {
-			chatUserService.deleteByUserAndChat(user, chat);
+			ChatUser cu = chatUserService.findByChatAndUser(chatId, user.getId());
+			chat.getUsers().remove(cu);
+			chatRepository.save(chat);
+			chatUserService.delete(cu);
+
+			logger.debug("The chat user has been deleted");
 		}
 
 	}
@@ -474,9 +540,9 @@ public class ChatServiceImpl implements ChatService {
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
-		if (!isOwner(chat, user)) {
+		if (!chatUserService.isOwner(chat, user)) {
 			reject("chat.remove.notOwner", validationResult);
 
 			throw new ValidationException("Exception occurred while removing chat. A user isn't an owner",
@@ -495,9 +561,12 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public void attachEvent(AttachEventRequest attachRequest) throws ValidationException {
+		logger.debug("Start attaching event");
+
 		BindingResult validationResult = getBindingResult(attachRequest, "attachRequest");
 
-		checkErrors(validationResult, "Exception occurred while checking id. Id can't be null", Type.BAD_REQUEST);
+		ErrorParser.checkErrors(validationResult, "Exception occurred while checking id. Id can't be null",
+				Type.BAD_REQUEST);
 
 		Long eventId = attachRequest.getEventId();
 		Long chatId = attachRequest.getChatId();
@@ -512,47 +581,27 @@ public class ChatServiceImpl implements ChatService {
 			rejectValue("chatId", "chat.attachEvent.eventId.notExist", validationResult, eventId);
 		}
 
-		checkErrors(validationResult,
+		ErrorParser.checkErrors(validationResult,
 				"Exception occurred while checking chat id and event id for existence. They both must exist",
 				Type.BAD_REQUEST);
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.findByUsername(auth.getName());
+		User user = userService.findById(Long.valueOf(auth.getName()));
 
 		Modification modification = chat.getSetting().getModification();
 		if (modification.equals(Modification.ADMIN)) {
-			if (!isAdmin(chat, user)) {
+			if (!chatUserService.isAdmin(chat, user)) {
 				reject("chat.attachEvent.notAdmin", validationResult, chatId);
 
 				throw new ValidationException(
 						"Exception occurred while checking admin opportunite to attach event. The user with id '%s' isn't an admin of chat '%s'",
 						validationResult, Type.FORBIDDEN, user.getId(), chatId);
 			}
-		} else {
-			chat.setEvent(event);
-
-			chatRepository.save(chat);
 		}
-	}
+		chat.setEvent(event);
+		logger.debug("The event has been attached to chat");
 
-	@Override
-	public boolean isMember(Chat chat, User user) {
-		return chatRepository.isMember(chat, user);
-	}
-
-	@Override
-	public boolean isMember(Long chatId, Long userId) {
-		return chatRepository.isMember(chatId, userId);
-	}
-
-	@Override
-	public boolean isAdmin(Chat chat, User user) {
-		return chatRepository.isAdmin(chat, user);
-	}
-
-	@Override
-	public boolean isOwner(Chat chat, User user) {
-		return chatRepository.isOwner(chat, user);
+		chatRepository.save(chat);
 	}
 
 	@Override
@@ -560,4 +609,12 @@ public class ChatServiceImpl implements ChatService {
 		return chatRepository.findByMessage(messageId);
 	}
 
+	@Override
+	public List<Chat> findAllOwn(int page) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		List<Chat> chats = chatRepository.findByUser(Long.valueOf(auth.getName()), PageRequest.of(page - 1, MAX));
+
+		return chats;
+	}
 }

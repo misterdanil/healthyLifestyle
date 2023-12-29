@@ -7,11 +7,13 @@ import org.healthylifestyle.filesystem.model.Voice;
 import org.healthylifestyle.user.model.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface VoiceRepository extends CrudRepository<Voice, Long> {
 	@Query("select v from Voice v where v.id in (:ids)")
 	List<Voice> findAllByIdIn(List<Long> ids);
 
-	@Query("delete from Voice v inner join Message m on m.voices = v inner join m.chatUser cu where i.id in (:ids) and m = :message and cu.user = :user")
+	@Query("delete from Voice v where v.id in (:ids) and v.id in (select v.id from Voice v inner join Message m on element(m.voices).id = v.id where m = :message and m.chatUser.user = :user)")
 	void deleteByMessage(List<Long> ids, Message message, User user);
 }
